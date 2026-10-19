@@ -17,7 +17,7 @@ Forecasts are scored with Brier score, normalised CRPS, direction accuracy, inte
 ## Layout
 
 ```
-src/signalbench/   package: data loaders, state builders, predictors, backtest, scoring
+src/sbench/        package (`import sbench`): data loaders, state builders, predictors, backtest, scoring
 notebooks/         research notebooks (narrative, experiments, results)
 data/              cached price histories and model results (committed for reproducibility)
 tests/             pytest suite
