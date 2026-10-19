@@ -5,7 +5,9 @@ at the forecast horizon. QuantilePredictor feeds it the task's history and maps
 the quantiles onto the task's threshold grid, so these models are scored exactly
 like decision models.
 
-Backends import their libraries lazily, so the package works without them.
+Backends: TimesFM3 (main, with related series as covariates), TimesFM25
+(previous generation, univariate), GaussianForecaster (reference for tests).
+They import their libraries lazily, so the package works without them.
 """
 from __future__ import annotations
 
@@ -37,7 +39,8 @@ class QuantilePredictor:
 
     max_context   : most recent points passed as context (None = all)
     log_space     : forecast log values for price series (returns the model
-                    quantiles back in price units); ignored for probability series
+                    quantiles back in price units); ignored for probability series.
+                    Related price series are logged too
     use_related   : pass the task's related series as covariates, keyed by
                     series.key and aligned as-of to the main series timestamps
     """
@@ -52,7 +55,7 @@ class QuantilePredictor:
         log = self.log_space and task.series.kind == "price"
         if log:
             ctx = np.log(ctx)
-        cov = self._covariates(task, len(ctx)) if self.use_related and task.related else None
+        cov = self._covariates(task, len(ctx), log) if self.use_related and task.related else None
         q = np.asarray(self.forecaster.forecast(ctx, task.horizon, cov), dtype=float)
         if log:
             q = np.exp(q)
@@ -62,13 +65,19 @@ class QuantilePredictor:
         return Forecast(p, raw={"levels": list(map(float, self.forecaster.levels)), "quantiles": q.tolist()})
 
     @staticmethod
-    def _covariates(task: ForecastTask, n: int) -> dict[str, np.ndarray]:
-        """Each related series as-of aligned to the last n timestamps of the main series."""
+    def _covariates(task: ForecastTask, n: int, log: bool = False) -> dict[str, np.ndarray]:
+        """Each related series as-of aligned to the last n timestamps of the main series.
+
+        NaN before a related series starts. With log=True, price series are logged
+        like the main context.
+        """
         times = task.series.df["t"].to_numpy()[task.idx + 1 - n:task.idx + 1]
         out = {}
         for other in task.related:
             pos = other.df["t"].searchsorted(times, side="right") - 1
             vals = other.df["close"].to_numpy()
+            if log and other.kind == "price":
+                vals = np.log(vals)
             out[other.key] = np.where(pos >= 0, vals[np.clip(pos, 0, None)], np.nan)
         return out
 
@@ -99,6 +108,101 @@ class GaussianForecaster:
 
     def describe(self) -> dict:
         return describe_dataclass(self)
+
+
+_MODELS: dict[tuple, object] = {}   # loaded checkpoints, shared by backends with the same settings
+
+
+def _load(key: tuple, loader):
+    if key not in _MODELS:
+        _MODELS[key] = loader()
+    return _MODELS[key]
+
+
+def _version(dist: str) -> str:
+    from importlib.metadata import PackageNotFoundError, version
+    try:
+        return version(dist)
+    except PackageNotFoundError:
+        return "not installed"
+
+
+@dataclass
+class TimesFM3:
+    """Google TimesFM 3.0 (PyTorch), pip install "signalbench[tsfm]".
+
+    Related series are passed as past-only covariates (values known up to the
+    decision time only), one row per series; leading NaNs are interpolated by
+    timesfm3 and all-NaN covariates are dropped.
+
+    checkpoint : Hugging Face repo id or local checkpoint
+    device     : "cuda" / "cpu"; None picks cuda when available. Not part of
+                 describe(), so a run can resume on other hardware
+    """
+    checkpoint: str = "google/timesfm-3.0-pytorch"
+    device: str | None = None
+
+    def __post_init__(self):
+        self.levels = DECILES
+
+    def _model(self):
+        def load():
+            from timesfm3 import TimesFM3Forecaster
+            m = TimesFM3Forecaster.from_pretrained(self.checkpoint, device=self.device)
+            if not np.allclose(m.config.quantiles, self.levels):
+                raise ValueError(f"{self.checkpoint} predicts quantiles {m.config.quantiles}, expected deciles")
+            return m
+        return _load(("timesfm3", self.checkpoint, self.device), load)
+
+    def forecast(self, context, horizon, covariates=None):
+        cov = [c for c in (covariates or {}).values() if not np.isnan(c).all()]
+        out = self._model().predict(np.asarray(context, dtype=float), horizon,
+                                    past_only_covariates=np.vstack(cov) if cov else None,
+                                    return_quantiles=True)
+        return np.asarray(out.quantiles)[horizon - 1]
+
+    def describe(self) -> dict:
+        d = describe_dataclass(self)
+        d.pop("device")
+        return {**d, "timesfm": _version("timesfm")}
+
+
+@dataclass
+class TimesFM25:
+    """Google TimesFM 2.5 200M (PyTorch), the previous-generation reference.
+
+    Univariate only: 2.5 takes covariates through its XReg linear model, which
+    needs JAX and future values of every covariate, so it raises if given any.
+
+    max_context / max_horizon : compiled decode sizes (contexts are truncated
+                                to max_context; horizons above max_horizon fail)
+    """
+    checkpoint: str = "google/timesfm-2.5-200m-pytorch"
+    max_context: int = 1024
+    max_horizon: int = 256
+
+    def __post_init__(self):
+        self.levels = DECILES
+
+    def _model(self):
+        def load():
+            import timesfm
+            m = timesfm.TimesFM_2p5_200M_torch.from_pretrained(self.checkpoint, torch_compile=False)
+            m.compile(timesfm.ForecastConfig(
+                max_context=self.max_context, max_horizon=self.max_horizon, normalize_inputs=True,
+                use_continuous_quantile_head=True, force_flip_invariance=True, infer_is_positive=True,
+                fix_quantile_crossing=True))
+            return m
+        return _load(("timesfm2.5", self.checkpoint, self.max_context, self.max_horizon), load)
+
+    def forecast(self, context, horizon, covariates=None):
+        if covariates:
+            raise ValueError("TimesFM25 does not support past-only covariates; use TimesFM3")
+        _, q = self._model().forecast(horizon=horizon, inputs=[np.asarray(context, dtype=float)])
+        return q[0, horizon - 1, 1:]     # column 0 is the mean, then the deciles
+
+    def describe(self) -> dict:
+        return {**describe_dataclass(self), "timesfm": _version("timesfm")}
 
 
 def _normal_ppf(p) -> np.ndarray:

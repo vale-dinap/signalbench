@@ -36,3 +36,10 @@ pytest
 ```
 
 Decision models need a local llama.cpp server (Ollama, LM Studio, etc.) exposing `/v1/systemone`.
+
+TimesFM (3.0, plus 2.5 as the previous-generation reference) is optional. Install a CUDA build of PyTorch first if you have a GPU, then the extra; weights download from Hugging Face on first use:
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cu130   # GPU; skip for CPU-only
+pip install -e ".[tsfm]"
+```

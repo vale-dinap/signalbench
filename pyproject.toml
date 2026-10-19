@@ -17,6 +17,8 @@ dependencies = [
 
 [project.optional-dependencies]
 yahoo = ["yfinance>=0.2.50"]
+# TimesFM 3.0 (package timesfm3) and 2.5 (package timesfm) ship in the same distribution
+tsfm = ["timesfm[torch]>=3.0.2,<4"]
 notebook = ["jupyterlab>=4.0", "ipykernel>=6.29"]
 dev = ["pytest>=8.0", "ruff>=0.6"]
 
