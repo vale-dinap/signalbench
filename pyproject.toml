@@ -25,6 +25,8 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["tests"]
+markers = ["server: needs a running decision-model server (skipped when unreachable)"]
 
 [tool.ruff]
 line-length = 110
