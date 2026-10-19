@@ -1,0 +1,18 @@
+# Normalise text files to LF in the repository and working tree, on every OS
+* text=auto eol=lf
+
+# Windows scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Notebooks: text, LF; show as JSON in diffs
+*.ipynb text eol=lf diff=json
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.parquet binary
