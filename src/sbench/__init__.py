@@ -8,4 +8,5 @@ elicitation : ways of asking a decision model for a forecast (thresholds, ranges
 states      : natural-language state builders and wording
 forecast    : ForecastTask, threshold grids, monotone CDFs, quantile mapping, CRPS
 predictors  : common predictor interface; decision models and baselines
+tsfm        : time-series foundation models (TimesFM) via quantile forecasts
 """
