@@ -10,4 +10,5 @@ forecast    : ForecastTask, threshold grids, monotone CDFs, quantile mapping, CR
 predictors  : common predictor interface; decision models and baselines
 tsfm        : time-series foundation models (TimesFM) via quantile forecasts
 backtest    : resumable forecast backtests (long-format CSV + run metadata + raw audit trail)
+scoring     : Brier / log loss / CRPS / direction / coverage metrics with bootstrap CIs
 """
