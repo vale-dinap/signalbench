@@ -1,5 +1,7 @@
 # signalbench
 
+[![CI](https://github.com/vale-dinap/signalbench/actions/workflows/ci.yml/badge.svg)](https://github.com/vale-dinap/signalbench/actions/workflows/ci.yml)
+
 Benchmarking AI models as trading-signal sources: decision models, time-series foundation models and their combinations, scored on calibrated forecasts.
 
 > Work in progress.
