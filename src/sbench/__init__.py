@@ -5,4 +5,5 @@ Modules
 data        : Series container, loaders (Polymarket, Binance, Yahoo), caching, alignment
 client      : System One decision-model client: noul / choice / score questions
 states      : natural-language state builders and wording
+forecast    : ForecastTask, threshold grids, monotone CDFs, quantile mapping, CRPS
 """
