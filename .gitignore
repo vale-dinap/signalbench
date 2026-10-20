@@ -20,6 +20,9 @@ htmlcov/
 # Generated outputs (charts, scratch exports); regenerate from the notebooks
 outputs/
 
+# Per-forecast audit trails (state text, questions, answers): large, kept locally
+data/results/**/*.raw.jsonl
+
 # Local / secrets
 .env
 .env.*
