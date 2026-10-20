@@ -1,0 +1,3434 @@
+{
+  "random_walk|h=5": {
+    "n_rows": 420,
+    "fingerprint": "b886c923cd78394f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  },
+  "trend_up|h=5": {
+    "n_rows": 420,
+    "fingerprint": "2df9d3483a9bc901",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  },
+  "trend_down|h=5": {
+    "n_rows": 420,
+    "fingerprint": "f834ed7c98b5c176",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  },
+  "mean_reversion|h=5": {
+    "n_rows": 420,
+    "fingerprint": "ecf197635c61c21c",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  },
+  "vol_regimes|h=5": {
+    "n_rows": 420,
+    "fingerprint": "90084b747c341a0d",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  },
+  "jumps|h=5": {
+    "n_rows": 420,
+    "fingerprint": "18f5b3a6d21d6915",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "oracle": {
+        "type": "OraclePredictor",
+        "name": "oracle"
+      },
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "constant": {
+        "type": "ConstantPredictor",
+        "p": 0.5,
+        "name": "constant"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "julia-1/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/threshold_noul"
+      },
+      "julia-1/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/bin_score"
+      },
+      "julia-1/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_noul"
+      },
+      "julia-1/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "julia-1",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "julia-1/direction_choice"
+      },
+      "laya/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/threshold_noul"
+      },
+      "laya/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/bin_score"
+      },
+      "laya/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_noul"
+      },
+      "laya/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "laya",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "laya/direction_choice"
+      },
+      "d1-omni-600m/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/threshold_noul"
+      },
+      "d1-omni-600m/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/bin_score"
+      },
+      "d1-omni-600m/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_noul"
+      },
+      "d1-omni-600m/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-omni-600m",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-omni-600m/direction_choice"
+      },
+      "d1-3b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/threshold_noul"
+      },
+      "d1-3b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/bin_score"
+      },
+      "d1-3b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_noul"
+      },
+      "d1-3b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "d1-3b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "d1-3b/direction_choice"
+      },
+      "kev-4b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/threshold_noul"
+      },
+      "kev-4b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/bin_score"
+      },
+      "kev-4b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_noul"
+      },
+      "kev-4b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-4b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-4b/direction_choice"
+      },
+      "lev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/threshold_noul"
+      },
+      "lev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/bin_score"
+      },
+      "lev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "kev-9b/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/bin_score"
+      },
+      "kev-9b/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_noul"
+      },
+      "kev-9b/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/direction_choice"
+      },
+      "bespoke-nimble-9b-v3/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/threshold_noul"
+      },
+      "bespoke-nimble-9b-v3/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/bin_score"
+      },
+      "bespoke-nimble-9b-v3/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_noul"
+      },
+      "bespoke-nimble-9b-v3/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "bespoke-nimble-9b-v3",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "bespoke-nimble-9b-v3/direction_choice"
+      },
+      "cloudflare_clef-flash/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/threshold_noul"
+      },
+      "cloudflare_clef-flash/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/bin_score"
+      },
+      "cloudflare_clef-flash/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_noul"
+      },
+      "cloudflare_clef-flash/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "cloudflare_clef-flash",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "cloudflare_clef-flash/direction_choice"
+      },
+      "openjev/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/threshold_noul"
+      },
+      "openjev/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/bin_score"
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      },
+      "openjev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_choice"
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "clef/bin_score": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "BinDistribution",
+          "question_type": "score",
+          "template": "Where will the {label} be {horizon}?",
+          "name": "bin_score"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/bin_score"
+      },
+      "clef/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_noul"
+      },
+      "clef/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/direction_choice"
+      }
+    }
+  }
+}
