@@ -95,6 +95,11 @@ def normalize_series(df: pd.DataFrame, t_col: str = "t", value_col: str | None =
     return out.reset_index(drop=True)
 
 
+def _utc_naive(ts) -> pd.Timestamp:
+    t = pd.Timestamp(ts)
+    return t.tz_convert("UTC").tz_localize(None) if t.tzinfo is not None else t
+
+
 def infer_freq(df: pd.DataFrame) -> pd.Timedelta:
     if len(df) < 2:
         return pd.Timedelta(days=1)
@@ -153,16 +158,27 @@ def fetch_polymarket_binary_markets(
     limit: int = 50,
     order: str = "volume24hr",
     exclude_keywords: tuple[str, ...] = (),
+    closed: bool = False,
+    end_date_min=None,
 ) -> list[dict]:
-    """Active binary markets from the top `limit` events, sorted by total volume."""
-    params = {"active": "true", "closed": "false", "limit": limit, "order": order, "ascending": "false"}
+    """Binary markets from the top `limit` events, sorted by total volume.
+
+    closed=False returns active markets; closed=True returns resolved ones (order
+    by "volume" then: 24-hour volume is zero after resolution). end_date_min keeps
+    events ending on or after that date. end_date is tz-naive UTC, or None.
+    """
+    params = {"closed": str(closed).lower(), "limit": limit, "order": order, "ascending": "false"}
+    if not closed:
+        params["active"] = "true"
+    if end_date_min is not None:
+        params["end_date_min"] = pd.Timestamp(end_date_min).strftime("%Y-%m-%d")
     r = requests.get(POLYMARKET_EVENTS_URL, params=params, timeout=30)
     r.raise_for_status()
 
     markets = []
     for event in r.json():
         for m in event.get("markets", []):
-            if not is_binary_market(m) or m.get("closed", False):
+            if not is_binary_market(m) or bool(m.get("closed", False)) != closed:
                 continue
             q = m.get("question", "")
             if any(k.lower() in q.lower() for k in exclude_keywords):
@@ -172,6 +188,7 @@ def fetch_polymarket_binary_markets(
                 "question": q,
                 "slug": m.get("slug"),
                 "volume": float(m.get("volume") or 0),
+                "end_date": _utc_naive(m["endDate"]) if m.get("endDate") else None,
                 "outcomes": m.get("outcomes"),
                 "clobTokenIds": m.get("clobTokenIds"),
                 "yes_token_id": json.loads(m["clobTokenIds"])[0] if m.get("clobTokenIds") else None,
