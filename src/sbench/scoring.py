@@ -80,8 +80,9 @@ def bootstrap_ci(x, fn=np.mean, n: int = 2000, alpha: float = 0.05, seed: int = 
     return tuple(np.quantile(stats, [alpha / 2, 1 - alpha / 2]))
 
 
-def summary(per: pd.DataFrame, baseline: str | None = "random_walk", ci: bool = True) -> pd.DataFrame:
-    """Per (series, horizon, predictor) table.
+def summary(per: pd.DataFrame, baseline: str | None = "random_walk", ci: bool = True,
+            by=("series", "horizon")) -> pd.DataFrame:
+    """Per (*by, predictor) table; by=("horizon",) pools all series.
 
     *_skill: 1 - mean(score) / mean(baseline score) on decision points both
     answered (> 0 = better than baseline). *_ci: 95% bootstrap interval of the
@@ -90,12 +91,13 @@ def summary(per: pd.DataFrame, baseline: str | None = "random_walk", ci: bool = 
     def mean(m, c):
         return m[c].mean() if c in m else np.nan
 
+    by = list(by)
     out = []
-    for (s, h), g in per.groupby(["series", "horizon"]):
-        base = g[g["predictor"] == baseline].set_index("t") if baseline else None
+    for keys, g in per.groupby(by):
+        base = g[g["predictor"] == baseline].set_index(["series", "t"]) if baseline else None
         for pred, m in g.groupby("predictor", sort=False):
             row = {
-                "series": s, "horizon": h, "predictor": pred, "N": len(m),
+                **dict(zip(by, keys)), "predictor": pred, "N": len(m),
                 "up_rate": m["up"].mean(), "flat_rate": m["flat"].mean(),
                 "dir_acc": m["dir_hit"].mean(), "dir_N": int(m["dir_hit"].notna().sum()),
                 "brier_up": mean(m, "brier_up"), "logloss_up": mean(m, "logloss_up"),
@@ -104,7 +106,7 @@ def summary(per: pd.DataFrame, baseline: str | None = "random_walk", ci: bool = 
                 "p_spread": mean(m, "p_spread"),
             }
             if base is not None and pred != baseline and len(base):
-                j = m.set_index("t").join(base, rsuffix="_b", how="inner")
+                j = m.set_index(["series", "t"]).join(base, rsuffix="_b", how="inner")
                 for metric in ("brier_up", "crps_n"):
                     if metric not in j or f"{metric}_b" not in j:
                         continue
@@ -117,8 +119,36 @@ def summary(per: pd.DataFrame, baseline: str | None = "random_walk", ci: bool = 
                         row[f"{metric}_ci"] = f"[{lo:+.4f}, {hi:+.4f}]"
             out.append(row)
     t = pd.DataFrame(out)
-    return (t.sort_values(["series", "horizon", "brier_up"])
-             .set_index(["series", "horizon", "predictor"]).round(4))
+    return t.sort_values([*by, "brier_up"]).set_index([*by, "predictor"]).round(4)
+
+
+def skill_table(per: pd.DataFrame, metric: str = "crps_n", baseline: str = "random_walk",
+                by=("horizon",), n: int = 2000, alpha: float = 0.05, seed: int = 0) -> pd.DataFrame:
+    """Skill 1 - mean(score) / mean(baseline score) with a paired bootstrap CI, for charts.
+
+    One row per (*by, predictor) with columns skill, lo, hi, N. Pairs are matched
+    on (series, t), so by=("horizon",) pools series; decision points are resampled
+    as pairs, so the interval reflects the comparison rather than each score alone.
+    """
+    by = list(by)
+    rng = np.random.default_rng(seed)
+    out = []
+    for keys, g in per.groupby(by):
+        keys = keys if isinstance(keys, tuple) else (keys,)
+        base = g[g["predictor"] == baseline].set_index(["series", "t"])[metric]
+        for pred, m in g.groupby("predictor", sort=False):
+            if pred == baseline or metric not in m:
+                continue
+            pair = pd.concat([m.set_index(["series", "t"])[metric], base], axis=1, join="inner").dropna()
+            if len(pair) < 2:
+                continue
+            x, b = pair.iloc[:, 0].to_numpy(), pair.iloc[:, 1].to_numpy()
+            idx = rng.integers(0, len(x), (n, len(x)))
+            boot = 1 - x[idx].mean(axis=1) / b[idx].mean(axis=1)
+            lo, hi = np.quantile(boot, [alpha / 2, 1 - alpha / 2])
+            out.append({**dict(zip(by, keys)), "predictor": pred, "skill": 1 - x.mean() / b.mean(),
+                        "lo": lo, "hi": hi, "N": len(x)})
+    return pd.DataFrame(out)
 
 
 def reliability(results: pd.DataFrame, bins: int = 10, sigma0_only: bool = False) -> pd.DataFrame:

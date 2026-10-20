@@ -9,7 +9,7 @@ from sbench.backtest import COLUMNS, decision_points, load_raw, run_forecast_bac
 from sbench.data import Series
 from sbench.forecast import make_task
 from sbench.predictors import ConstantPredictor, Forecast, RandomWalkPredictor
-from sbench.scoring import per_forecast, summary
+from sbench.scoring import per_forecast, skill_table, summary
 
 
 class Flaky:
@@ -104,6 +104,20 @@ def test_random_walk_is_calibrated_on_a_random_walk(tmp_path):
     assert 0.72 <= tab.loc["random_walk", "cover_80"] <= 0.88
     assert tab.loc["constant", "crps_n_skill"] < 0
     assert abs(tab.loc["random_walk", "brier_up"] - 0.25) < 0.01
+
+
+def test_pooled_summary_pairs_by_series_and_time(tmp_path):
+    a, b = make_gbm(key="a", seed=1), make_gbm(key="b", seed=2)   # same timestamps
+    path, idxs = tmp_path / "r.csv", decision_points(a, 1, max_points=10)
+    preds = [RandomWalkPredictor(), ConstantPredictor()]
+    res = pd.concat([run_forecast_backtest(s, preds, 1, path, idxs, verbose=False) for s in (a, b)])
+    per = per_forecast(res)
+    pooled = summary(per, ci=False, by=("horizon",)).loc[1]
+    assert pooled.loc["constant", "N"] == 20
+    c, rw = (per[per["predictor"] == p]["crps_n"].mean() for p in ("constant", "random_walk"))
+    assert np.isclose(pooled.loc["constant", "crps_n_skill"], 1 - c / rw, atol=1e-4)
+    sk = skill_table(per).set_index("predictor").loc["constant"]
+    assert np.isclose(sk["skill"], 1 - c / rw) and sk["lo"] <= sk["skill"] <= sk["hi"] and sk["N"] == 20
 
 
 def test_direction_only_predictor_is_scored(tmp_path, gbm):
