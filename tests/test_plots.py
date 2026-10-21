@@ -19,7 +19,10 @@ def test_charts_render_and_save(tmp_path, gbm):
     plots.reliability_panels(rel, path=tmp_path / "d.png")
     plots.scatter_panels(pd.DataFrame({"p": "a", "x": [0.1, 0.5, 0.9], "y": [0.2, 0.5, 0.8]}), "p", "x", "y",
                          path=tmp_path / "e.png")
-    assert len(list(tmp_path.glob("*.png"))) == 5
+    lines = pd.DataFrame({"p": "a", "h": ["u", "u", "v", "v"], "x": [0, 1, 0, 1], "y": [0.4, 0.6, 0.5, 0.5]})
+    ref = pd.DataFrame({"x": [0, 1], "y": [0.5, 0.5], "lo": [0.4, 0.4], "hi": [0.6, 0.6]})
+    plots.line_panels(lines, "p", "x", "y", hue="h", ref=ref, title="t", path=tmp_path / "f.png")
+    assert len(list(tmp_path.glob("*.png"))) == 6
 
 
 def test_dot_plot_refuses_more_than_three_hues():

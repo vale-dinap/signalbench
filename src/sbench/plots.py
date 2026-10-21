@@ -170,6 +170,47 @@ def reliability_panels(rel: pd.DataFrame, order=None, ncols: int = 4, title: str
     return _save(fig, path)
 
 
+def line_panels(df: pd.DataFrame, panel: str, x: str, y: str, hue: str, ref: pd.DataFrame | None = None,
+                ref_label: str = "reference", order=None, ncols: int = 3, xlabel: str | None = None,
+                ylabel: str | None = None, title: str | None = None, path=None):
+    """One panel per `panel` value with a line per `hue` (at most 3, colour plus marker).
+
+    ref : optional frame with columns x, y, lo, hi drawn in every panel as a neutral
+          line with its interval band (e.g. what actually happened).
+    """
+    order = list(order) if order is not None else list(dict.fromkeys(df[panel]))
+    hues = list(dict.fromkeys(df[hue]))
+    if len(hues) > 3:
+        raise ValueError(f"line_panels supports at most 3 hues, got {len(hues)}")
+    nrows = -(-len(order) // ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.2 * ncols, 2.5 * nrows + 0.5), squeeze=False,
+                             sharex=True, sharey=True)
+    for ax, p in zip(axes.flat, order):
+        if ref is not None:
+            ax.fill_between(ref[x], ref["lo"], ref["hi"], color=NEUTRAL, alpha=0.2, lw=0)
+            ax.plot(ref[x], ref[y], color=NEUTRAL, lw=1.5, ls="--", label=ref_label)
+        d = df[df[panel] == p]
+        for j, h in enumerate(hues):
+            g = d[d[hue] == h].sort_values(x)
+            if len(g):
+                ax.plot(g[x], g[y], color=CATEGORICAL[j], lw=2, marker=MARKERS[j], ms=5,
+                        markeredgecolor=SURFACE, label=h)
+        ax.set_title(p, fontsize=8.5)
+    for ax in axes.flat[len(order):]:
+        ax.set_visible(False)
+    for ax in axes[-1]:
+        ax.set_xlabel(xlabel or x)
+    for ax in axes[:, 0]:
+        ax.set_ylabel(ylabel or y)
+    handles = {lab: h for ax in axes.flat for h, lab in zip(*ax.get_legend_handles_labels())}
+    fig.legend(handles.values(), handles.keys(), loc="upper left", bbox_to_anchor=(0.01, 0.995 if not title else 0.96),
+               ncol=len(handles), fontsize=8)
+    if title:
+        fig.suptitle(title, x=0.01, y=1.0, ha="left", fontweight="bold")
+    fig.tight_layout(rect=(0, 0, 1, 1 - 0.4 / fig.get_figheight()))   # room for title and legend
+    return _save(fig, path)
+
+
 def scatter_panels(df: pd.DataFrame, panel: str, x: str, y: str, order=None, ncols: int = 4,
                    xlabel: str | None = None, ylabel: str | None = None, title: str | None = None, path=None):
     """One scatter per `panel` value with the identity line, e.g. a model's P(up) vs the oracle's."""
