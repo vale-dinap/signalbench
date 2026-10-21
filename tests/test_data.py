@@ -57,3 +57,13 @@ def test_active_markets_by_default(fake_events):
     out = data.fetch_polymarket_binary_markets()
     assert [m["question"] for m in out] == ["Still open"]
     assert fake_events[0]["closed"] == "false" and fake_events[0]["active"] == "true"
+
+
+def test_snapshot_round_trip_is_exact(tmp_path):
+    t = pd.to_datetime([1672531200000, 1672617600000], unit="ms")   # millisecond resolution, as from Binance
+    raw = pd.DataFrame({"t": t, "close": [363.23202514648438, 0.1 + 0.2]})
+    first = data.cached(tmp_path / "s.csv", lambda: raw)
+    again = data.cached(tmp_path / "s.csv", lambda: pytest.fail("snapshot not reused"))
+    assert first["t"].dtype == "datetime64[ns]"
+    pd.testing.assert_frame_equal(first, again)
+    assert again["close"].tolist() == raw["close"].tolist()

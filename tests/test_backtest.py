@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from conftest import make_gbm
-from sbench.backtest import COLUMNS, decision_points, load_raw, run_forecast_backtest
+from sbench.backtest import COLUMNS, _fingerprint, decision_points, load_raw, run_forecast_backtest
 from sbench.data import Series
 from sbench.forecast import make_task
 from sbench.predictors import ConstantPredictor, Forecast, RandomWalkPredictor
@@ -94,6 +94,18 @@ def test_appended_data_keeps_run_valid(tmp_path):
     run_forecast_backtest(long, [RandomWalkPredictor()], 1, path, idxs, verbose=False)
     meta = json.loads((tmp_path / "r.meta.json").read_text())
     assert meta["gbm|h=1"]["n_rows"] == 200
+
+
+def test_fingerprint_from_another_time_resolution_is_accepted_and_upgraded(tmp_path, gbm):
+    path, meta_path = tmp_path / "r.csv", tmp_path / "r.meta.json"
+    idxs = decision_points(gbm, 1, max_points=3)
+    run_forecast_backtest(gbm, [RandomWalkPredictor()], 1, path, idxs, verbose=False)
+    meta = json.loads(meta_path.read_text())
+    current = meta["gbm|h=1"]["fingerprint"]
+    meta["gbm|h=1"]["fingerprint"] = _fingerprint(gbm, len(gbm), unit="s")   # as stored before ns timestamps
+    meta_path.write_text(json.dumps(meta))
+    run_forecast_backtest(gbm, [RandomWalkPredictor()], 1, path, idxs, verbose=False)
+    assert json.loads(meta_path.read_text())["gbm|h=1"]["fingerprint"] == current
 
 
 def test_random_walk_is_calibrated_on_a_random_walk(tmp_path):

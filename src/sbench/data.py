@@ -91,6 +91,7 @@ def normalize_series(df: pd.DataFrame, t_col: str = "t", value_col: str | None =
     })
     if out["t"].dt.tz is not None:
         out["t"] = out["t"].dt.tz_convert("UTC").dt.tz_localize(None)
+    out["t"] = out["t"].astype("datetime64[ns]")   # one resolution whatever the source (pandas 3 keeps s/ms/us)
     out = out.dropna().sort_values("t").drop_duplicates("t", keep="last")
     return out.reset_index(drop=True)
 
@@ -136,12 +137,12 @@ def cached(path: str | Path, loader: Callable[..., pd.DataFrame], *args, refresh
     Snapshots keep reruns reproducible: live endpoints keep moving the end date.
     """
     path = Path(path)
-    if path.exists() and not refresh:
-        return normalize_series(pd.read_csv(path))
-    df = normalize_series(loader(*args, **kwargs))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(path, index=False)
-    return df
+    if not path.exists() or refresh:
+        df = normalize_series(loader(*args, **kwargs))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(path, index=False)
+    # the default parser can be off in the last bit; round_trip reads back exactly what was written
+    return normalize_series(pd.read_csv(path, float_precision="round_trip"))
 
 
 # ── Polymarket ─────────────────────────────────────────────────────────────────

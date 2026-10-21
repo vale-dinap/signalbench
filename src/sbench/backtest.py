@@ -72,12 +72,17 @@ def _sidecar(csv_path, suffix: str) -> Path:
     return p.with_name(p.stem + suffix)
 
 
-def _fingerprint(series: Series, n: int) -> str:
+def _fingerprint(series: Series, n: int, unit: str = "ns") -> str:
     """Hash of the first n rows, so appending new data keeps old runs valid."""
     df = series.df.iloc[:n]
-    h = hashlib.sha1(df["t"].astype("int64").to_numpy().tobytes())
+    h = hashlib.sha1(df["t"].astype(f"datetime64[{unit}]").astype("int64").to_numpy().tobytes())
     h.update(df["close"].to_numpy(dtype=float).tobytes())
     return h.hexdigest()[:16]
+
+
+def _same_data(series: Series, n: int, stored: str) -> bool:
+    # Fingerprints written before timestamps were normalised to ns hashed the source's own resolution.
+    return any(_fingerprint(series, n, unit) == stored for unit in ("ns", "us", "ms", "s"))
 
 
 def _check_meta(csv_path: Path, series: Series, horizon: int, sigmas, vol_window: int,
@@ -93,11 +98,12 @@ def _check_meta(csv_path: Path, series: Series, horizon: int, sigmas, vol_window
     else:
         problems = [f"{k}: stored {entry.get(k)!r}, now {v!r}" for k, v in cfg.items() if entry.get(k) != v]
         n = entry["n_rows"]
-        if len(series) < n or _fingerprint(series, n) != entry["fingerprint"]:
+        if len(series) < n or not _same_data(series, n, entry["fingerprint"]):
             problems.append(f"series data differs from the first {n} rows used before")
         if problems:
             raise ValueError(f"{path.name} [{key}] configuration changed:\n  " + "\n  ".join(problems)
                              + "\nUse a new csv_path for a new configuration.")
+        entry["fingerprint"] = _fingerprint(series, n)
     for pred in predictors:
         desc = json.loads(json.dumps(pred.describe(), default=str))
         old = entry["predictors"].get(pred.name)
