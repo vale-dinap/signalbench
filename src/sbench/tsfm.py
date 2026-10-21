@@ -119,6 +119,21 @@ def _load(key: tuple, loader):
     return _MODELS[key]
 
 
+def release() -> None:
+    """Drop every loaded checkpoint and return its GPU memory to the device.
+
+    Call it before other GPU-heavy work (e.g. a decision-model server sharing the
+    card); the next forecast reloads the checkpoint.
+    """
+    import gc
+    import sys
+    _MODELS.clear()
+    gc.collect()
+    torch = sys.modules.get("torch")   # only if a backend already imported it
+    if torch is not None and torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
 def _version(dist: str) -> str:
     from importlib.metadata import PackageNotFoundError, version
     try:

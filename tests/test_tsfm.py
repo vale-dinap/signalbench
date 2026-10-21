@@ -42,6 +42,12 @@ def test_timesfm3_stacks_covariates_and_drops_empty_ones(stub, gbm):
     np.testing.assert_allclose(cov[0, -1], np.log(2 * task.current))
 
 
+def test_release_drops_loaded_checkpoints(stub):
+    TimesFM3("stub").forecast(np.array([1.0, 2.0, 3.0]), horizon=1)
+    tsfm.release()
+    assert ("timesfm3", "stub", None) not in tsfm._MODELS
+
+
 def test_timesfm3_describe_omits_device():
     d = TimesFM3(device="cpu").describe()
     assert "device" not in d and d["type"] == "TimesFM3" and "timesfm" in d
