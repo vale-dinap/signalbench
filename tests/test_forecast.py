@@ -89,3 +89,23 @@ def test_crps_prefers_sharp_correct_forecast():
     wide = np.array([0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2])
     assert crps(th, sharp, 100.0) < crps(th, wide, 100.0)
     assert crps(th, sharp, 103.0) > crps(th, wide, 103.0)
+
+
+def test_related_values_are_taken_by_availability_not_label(gbm):
+    """A crypto bar labelled D closes at 00:00 UTC on D+1, after a US close on D: not yet known."""
+    from sbench.data import BINANCE_DAILY_CLOSE, US_MARKET_CLOSE
+    from sbench.states import build_price_state
+    from sbench.tsfm import QuantilePredictor
+
+    days = pd.bdate_range("2025-03-03", periods=60)
+    us = Series("us", "US asset", pd.DataFrame({"t": days, "close": np.linspace(100, 160, 60)}),
+                close_time=US_MARKET_CLOSE)
+    crypto = Series("crypto", "Crypto asset", pd.DataFrame({"t": days, "close": np.arange(1.0, 61.0)}),
+                    close_time=BINANCE_DAILY_CLOSE)
+    task = make_task(us, 40, 1, related=(crypto,))
+    assert task.related_history(crypto)[-1] == 40.0          # label 39 (the day before), not 41 (same label)
+    assert "Latest close price: 40.00" in build_price_state(task)
+    cov = QuantilePredictor._covariates(task, 5)["crypto"]
+    np.testing.assert_array_equal(cov, [36.0, 37.0, 38.0, 39.0, 40.0])
+    by_label = make_task(Series("us", "US", us.df), 40, 1, related=(Series("c", "C", crypto.df),))
+    assert by_label.related_history(by_label.related[0])[-1] == 41.0   # without close times: as before

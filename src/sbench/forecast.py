@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from .data import Series
+from .data import Series, known_rows
 
 DEFAULT_SIGMAS = (-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0)
 PROB_EPS = 1e-3          # keep probability-series thresholds strictly inside (0, 1)
@@ -89,6 +89,11 @@ class ForecastTask:
         return self.series.df["t"].iloc[self.idx]
 
     @property
+    def known_at(self) -> pd.Timestamp:
+        """When the current value became known (UTC); the cut-off for every other input."""
+        return pd.Timestamp(self.series.available_at()[self.idx])
+
+    @property
     def current(self) -> float:
         return float(self.series.df["close"].iloc[self.idx])
 
@@ -103,9 +108,8 @@ class ForecastTask:
         return int(np.flatnonzero(self.sigmas == 0)[0])
 
     def related_history(self, other: Series) -> np.ndarray:
-        """Another series' values at or before the decision time (as-of, no look-ahead)."""
-        pos = int(other.df["t"].searchsorted(self.t, side="right"))
-        return other.df["close"].to_numpy()[:pos]
+        """Another series' values already known at the decision time (no look-ahead)."""
+        return other.df["close"].to_numpy()[:int(known_rows(other, self.known_at))]
 
 
 def make_task(series: Series, idx: int, horizon: int, sigmas=DEFAULT_SIGMAS, vol_window: int = 30,

@@ -3,12 +3,17 @@
 Every loader returns a DataFrame with exactly two columns:
     t     : pandas Timestamp (tz-naive, UTC), sorted, unique
     close : float
+
+For daily bars `t` is a date label, not the moment the close was known; a
+Series' close_time says when that is, so other series can be aligned without
+look-ahead (Series.available_at, known_rows).
 """
 from __future__ import annotations
 
 import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from io import StringIO
 from pathlib import Path
 from typing import Literal
 
@@ -19,6 +24,28 @@ import requests
 POLYMARKET_EVENTS_URL = "https://gamma-api.polymarket.com/events"
 POLYMARKET_HISTORY_URL = "https://clob.polymarket.com/prices-history"
 BINANCE_KLINES_URL = "https://data-api.binance.vision/api/v3/klines"
+ECB_EXR_URL = "https://data-api.ecb.europa.eu/service/data/EXR/D.{currencies}.EUR.SP00.A"
+
+
+@dataclass(frozen=True)
+class CloseTime:
+    """When a daily bar labelled D is final: local clock time `at` after midnight of D in `tz`.
+
+    `at` may reach 24 h (a Binance candle labelled D closes at 00:00 UTC on D+1).
+    """
+    tz: str
+    at: pd.Timedelta
+
+    def resolve(self, labels: pd.Series) -> pd.Series:
+        """UTC (tz-naive) times at which bars with these date labels became known."""
+        local = (labels.dt.normalize() + self.at).dt.tz_localize(self.tz, nonexistent="shift_forward",
+                                                                 ambiguous=False)
+        return local.dt.tz_convert("UTC").dt.tz_localize(None)
+
+
+BINANCE_DAILY_CLOSE = CloseTime("UTC", pd.Timedelta(hours=24))
+US_MARKET_CLOSE = CloseTime("America/New_York", pd.Timedelta(hours=16))       # NYSE / Nasdaq, ETFs included
+ECB_REFERENCE_FIX = CloseTime("Europe/Berlin", pd.Timedelta(hours=14, minutes=15))
 
 
 @dataclass
@@ -33,6 +60,8 @@ class Series:
     value_label : how questions refer to the value ("Yes price", "close price")
     unit        : appended to formatted values ("USD", "" for probabilities)
     decimals    : display precision; None = choose from the price level
+    close_time  : when each bar became known (see CloseTime); None = the label itself
+                  is that time (intraday data, prediction-market points)
     """
     key: str
     description: str
@@ -42,10 +71,13 @@ class Series:
     unit: str = ""
     decimals: int | None = None
     meta: dict = field(default_factory=dict)
+    close_time: CloseTime | None = None
 
     def __post_init__(self):
         self.df = normalize_series(self.df)
         self._precision = self.decimals if self.decimals is not None else self._auto_precision()
+        t = self.df["t"]
+        self._available = (t if self.close_time is None else self.close_time.resolve(t)).to_numpy()
 
     def __len__(self) -> int:
         return len(self.df)
@@ -54,6 +86,10 @@ class Series:
     def freq(self) -> pd.Timedelta:
         """Median spacing between observations."""
         return infer_freq(self.df)
+
+    def available_at(self) -> np.ndarray:
+        """UTC (tz-naive) time each row became known, aligned with df; non-decreasing."""
+        return self._available
 
     def precision(self) -> int:
         return self._precision
@@ -77,6 +113,11 @@ class Series:
 
     def round(self, x):
         return np.round(x, self.precision())
+
+
+def known_rows(series: Series, when) -> int | np.ndarray:
+    """How many leading rows of `series` were known at time(s) `when` (UTC, tz-naive)."""
+    return np.searchsorted(series.available_at(), np.asarray(when, dtype="datetime64[ns]"), side="right")
 
 
 # ── Normalisation ──────────────────────────────────────────────────────────────
@@ -267,12 +308,36 @@ def load_yahoo(ticker: str, start=None, end=None, interval: str = "1d") -> pd.Da
     return normalize_series(close.rename("close").rename_axis("t").reset_index())
 
 
+# ── ECB reference rates (official daily fix, no API key) ──────────────────────
+
+def load_ecb_rate(base: str, quote: str, start=None, end=None) -> pd.DataFrame:
+    """Price of `base` in `quote` from the ECB euro reference rates (fixed 14:15 Frankfurt).
+
+    The ECB publishes units of each currency per euro; other pairs are crosses,
+    e.g. USD/JPY = (JPY per EUR) / (USD per EUR) on the same fixing day.
+    """
+    others = sorted({base, quote} - {"EUR"})
+    params = {"format": "csvdata"}
+    if start is not None:
+        params["startPeriod"] = pd.Timestamp(start).strftime("%Y-%m-%d")
+    if end is not None:
+        params["endPeriod"] = pd.Timestamp(end).strftime("%Y-%m-%d")
+    r = requests.get(ECB_EXR_URL.format(currencies="+".join(others)), params=params, timeout=30)
+    r.raise_for_status()
+    raw = pd.read_csv(StringIO(r.text), usecols=["CURRENCY", "TIME_PERIOD", "OBS_VALUE"])
+    per_eur = raw.pivot(index="TIME_PERIOD", columns="CURRENCY", values="OBS_VALUE").dropna().assign(EUR=1.0)
+    close = per_eur[quote] / per_eur[base]
+    return normalize_series(pd.DataFrame({"t": close.index, "close": close.to_numpy()}))
+
+
 # ── Alignment ──────────────────────────────────────────────────────────────────
 
 def align_to(main: pd.DataFrame, others: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """Align other series to main's timestamps using only past-or-equal values (as-of join).
 
-    Returns a frame with column t plus one column per key. No look-ahead.
+    Returns a frame with column t plus one column per key. Joins on the frames' `t`
+    labels: for daily bars from sources that close at different times, align
+    Series by availability instead (Series.available_at, known_rows).
     """
     out = main[["t"]].copy()
     for key, df in others.items():

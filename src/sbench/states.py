@@ -9,9 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 
-from .data import Series
+from .data import Series, known_rows
 
 if TYPE_CHECKING:
     from .forecast import ForecastTask
@@ -67,7 +68,7 @@ def build_price_state(task: ForecastTask, lookback: int = -1, related_lookback: 
         *history_lines(s, task.idx + 1, lookback),
     ]
     for other in task.related:
-        pos = int(other.df["t"].searchsorted(task.t, side="right"))
+        pos = int(known_rows(other, task.known_at))
         if pos == 0:
             continue
         lines += ["", f"Related: {other.description}"]
@@ -76,3 +77,47 @@ def build_price_state(task: ForecastTask, lookback: int = -1, related_lookback: 
         else:
             lines.extend(history_lines(other, pos, related_lookback))
     return "\n".join(lines)
+
+
+def indicator_lines(series: Series, end_pos: int) -> list[str]:
+    """Common technical indicators at row end_pos - 1, computed from rows before end_pos only.
+
+    Moving averages (20, 50, 200), Bollinger bands (20, 2 sd) with %B, Wilder's
+    14-period RSI and the change over the last 20 observations; "n/a" where the
+    history is too short.
+    """
+    c = series.df["close"].iloc[:end_pos].reset_index(drop=True)
+    last = float(c.iloc[-1])
+
+    def ma(n: int) -> float:
+        return float(c.iloc[-n:].mean()) if len(c) >= n else np.nan
+
+    def vs(level: float) -> str:
+        return "n/a" if np.isnan(level) else f"{series.fmt(level)} (price {100 * (last / level - 1):+.1f}%)"
+
+    ma20 = ma(20)
+    sd20 = float(c.iloc[-20:].std()) if len(c) >= 20 else np.nan
+    lo, hi = ma20 - 2 * sd20, ma20 + 2 * sd20
+    d = c.diff()
+    gain = d.clip(lower=0).ewm(alpha=1 / 14, adjust=False).mean().iloc[-1]
+    loss = (-d.clip(upper=0)).ewm(alpha=1 / 14, adjust=False).mean().iloc[-1]
+    rsi = np.nan if len(c) < 15 else 100.0 if loss == 0 else 100 - 100 / (1 + gain / loss)
+    change = 100 * (last / float(c.iloc[-21]) - 1) if len(c) >= 21 else np.nan
+    na = "n/a"
+    return [
+        "Indicators at the current close:",
+        f"  20-day moving average: {vs(ma20)}",
+        f"  50-day moving average: {vs(ma(50))}",
+        f"  200-day moving average: {vs(ma(200))}",
+        "  Bollinger bands (20, 2 sd): " + (na if np.isnan(sd20) else
+                                            f"{series.fmt(lo)} to {series.fmt(hi)}, "
+                                            f"%B {(last - lo) / (hi - lo) if hi > lo else 0.5:.2f}"),
+        f"  14-period RSI: {na if np.isnan(rsi) else f'{rsi:.0f}'}",
+        f"  Change over the last 20 observations: {na if np.isnan(change) else f'{change:+.1f}%'}",
+    ]
+
+
+def build_indicator_state(task: ForecastTask, lookback: int = -1, related_lookback: int = 0) -> str:
+    """build_price_state plus technical indicators at the decision time (indicator_lines)."""
+    return "\n".join([build_price_state(task, lookback, related_lookback), "",
+                      *indicator_lines(task.series, task.idx + 1)])

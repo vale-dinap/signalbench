@@ -16,6 +16,7 @@ from typing import Protocol
 
 import numpy as np
 
+from .data import known_rows
 from .forecast import ForecastTask, normal_sf, p_above_from_quantiles
 from .predictors import Forecast, describe_dataclass
 
@@ -42,7 +43,7 @@ class QuantilePredictor:
                     quantiles back in price units); ignored for probability series.
                     Related price series are logged too
     use_related   : pass the task's related series as covariates, keyed by
-                    series.key and aligned as-of to the main series timestamps
+                    series.key, with the values known at each main-series close
     """
     forecaster: QuantileForecaster
     name: str = "tsfm"
@@ -66,15 +67,16 @@ class QuantilePredictor:
 
     @staticmethod
     def _covariates(task: ForecastTask, n: int, log: bool = False) -> dict[str, np.ndarray]:
-        """Each related series as-of aligned to the last n timestamps of the main series.
+        """Each related series' latest known value at each of the main series' last n closes.
 
-        NaN before a related series starts. With log=True, price series are logged
-        like the main context.
+        Aligned on availability times (Series.available_at), so a related bar that
+        closes after the main one is not used. NaN before a related series starts.
+        With log=True, price series are logged like the main context.
         """
-        times = task.series.df["t"].to_numpy()[task.idx + 1 - n:task.idx + 1]
+        times = task.series.available_at()[task.idx + 1 - n:task.idx + 1]
         out = {}
         for other in task.related:
-            pos = other.df["t"].searchsorted(times, side="right") - 1
+            pos = known_rows(other, times) - 1
             vals = other.df["close"].to_numpy()
             if log and other.kind == "price":
                 vals = np.log(vals)

@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -67,3 +68,38 @@ def test_snapshot_round_trip_is_exact(tmp_path):
     assert first["t"].dtype == "datetime64[ns]"
     pd.testing.assert_frame_equal(first, again)
     assert again["close"].tolist() == raw["close"].tolist()
+
+
+def test_close_times_resolve_to_utc_across_daylight_saving():
+    labels = pd.Series(pd.to_datetime(["2025-03-07", "2025-03-10", "2025-07-15"]))
+    assert data.US_MARKET_CLOSE.resolve(labels).tolist() == [
+        pd.Timestamp("2025-03-07 21:00"), pd.Timestamp("2025-03-10 20:00"), pd.Timestamp("2025-07-15 20:00")]
+    assert data.ECB_REFERENCE_FIX.resolve(labels).iloc[[0, 2]].tolist() == [
+        pd.Timestamp("2025-03-07 13:15"), pd.Timestamp("2025-07-15 12:15")]
+    assert data.BINANCE_DAILY_CLOSE.resolve(labels).iloc[0] == pd.Timestamp("2025-03-08 00:00")
+
+
+def test_series_without_close_time_is_known_at_its_labels(gbm):
+    np.testing.assert_array_equal(gbm.available_at(), gbm.df["t"].to_numpy())
+    assert data.known_rows(gbm, gbm.df["t"].iloc[9]) == 10
+
+
+def test_ecb_rates_cross_through_the_euro(monkeypatch):
+    csv = ("KEY,CURRENCY,TIME_PERIOD,OBS_VALUE\n"
+           "a,JPY,2026-09-29,178.41\na,USD,2026-09-29,1.1355\n"
+           "a,JPY,2026-09-30,178.27\na,USD,2026-09-30,1.1355\na,USD,2026-10-01,1.14\n")
+    seen = {}
+
+    def get(url, params, timeout):   # like the API: only the currencies in the URL
+        seen["url"] = url
+        wanted = url.split("/D.")[1].split(".EUR")[0].split("+")
+        lines = csv.splitlines()
+        text = "\n".join(lines[:1] + [ln for ln in lines[1:] if ln.split(",")[1] in wanted])
+        return type("R", (), {"text": text, "raise_for_status": lambda self: None})()
+
+    monkeypatch.setattr(data.requests, "get", get)
+    usdjpy = data.load_ecb_rate("USD", "JPY")
+    assert seen["url"].endswith("/D.JPY+USD.EUR.SP00.A")
+    assert len(usdjpy) == 2   # 2026-10-01 has no JPY fix
+    assert usdjpy["close"].iloc[0] == pytest.approx(178.41 / 1.1355)
+    assert data.load_ecb_rate("EUR", "USD")["close"].iloc[-1] == pytest.approx(1.14)

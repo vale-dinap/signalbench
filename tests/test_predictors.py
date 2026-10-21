@@ -105,3 +105,16 @@ def test_blind_predictor_shows_no_name_dates_or_levels(monkeypatch, gbm):
 def test_describe_is_unchanged_for_named_predictors():
     d = DecisionModelPredictor("m").describe()
     assert "blind" not in d and DecisionModelPredictor("m", blind=True).describe()["blind_window"] == 60
+
+
+def test_indicator_state_uses_only_past_data_and_known_values(gbm):
+    from sbench.states import build_indicator_state, indicator_lines
+
+    task = make_task(gbm, 250, 5)
+    cut = Series(gbm.key, gbm.description, gbm.df.iloc[:251], unit="USD")
+    assert build_indicator_state(task) == build_indicator_state(make_task(cut, 250, 5))
+    rising = Series("up", "Up", gbm.df.assign(close=np.arange(1.0, len(gbm) + 1)))
+    lines = indicator_lines(rising, 100)
+    assert "14-period RSI: 100" in lines[5] and "200-day moving average: n/a" in lines[3]
+    assert "Change over the last 20 observations: +25.0%" in lines[6]   # 100 / 80
+    assert "%B" in lines[4]
