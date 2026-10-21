@@ -23,7 +23,7 @@ import numpy as np
 
 from .client import DEFAULT_URL, ask
 from .elicitation import ThresholdNoul
-from .forecast import ForecastTask, horizon_scale, normal_sf
+from .forecast import ForecastTask, blind_task, horizon_scale, normal_sf
 from .states import build_price_state
 
 
@@ -73,18 +73,24 @@ class DecisionModelPredictor:
     state_builder : callable(task) -> str; default full-history price state.
                     Any context (related series, news, another model's forecast)
                     goes in through here.
+    blind         : ask on forecast.blind_task(task, blind_window) instead: no name,
+                    no dates, prices rebased, so the model has nothing to recall.
     """
     model: str
     elicitation: object = field(default_factory=ThresholdNoul)
     state_builder: Callable[[ForecastTask], str] = build_price_state
     name: str = ""
+    blind: bool = False
+    blind_window: int = 60
     url: str = DEFAULT_URL
     timeout: int = 300
 
     def __post_init__(self):
-        self.name = self.name or f"{self.model}/{self.elicitation.name}"
+        self.name = self.name or f"{self.model}/{self.elicitation.name}" + ("/blind" if self.blind else "")
 
     def predict(self, task: ForecastTask) -> Forecast:
+        if self.blind:
+            task = blind_task(task, self.blind_window)
         state = self.state_builder(task)
         questions = self.elicitation.questions(task)
         resp = ask(self.model, state, questions, timeout=self.timeout, url=self.url)
@@ -94,6 +100,8 @@ class DecisionModelPredictor:
     def describe(self) -> dict:
         d = describe_dataclass(self)
         d.pop("url"); d.pop("timeout")   # transport settings don't change results
+        if not self.blind:               # keeps earlier runs' stored descriptions valid
+            d.pop("blind"); d.pop("blind_window")
         return d
 
 

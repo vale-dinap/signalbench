@@ -114,6 +114,27 @@ def make_task(series: Series, idx: int, horizon: int, sigmas=DEFAULT_SIGMAS, vol
     return ForecastTask(series, idx, horizon, th, sig, scale, tuple(related))
 
 
+BLIND_DESCRIPTION = "Asset: daily close price, rebased to 100 at the first day shown"
+
+
+def blind_task(task: ForecastTask, window: int = 60) -> ForecastTask:
+    """The same question with the cues a model could recall removed.
+
+    Keeps the last `window` observations up to the decision point, rescales them so
+    the first one shown is 100 and drops the name and unit; meta["blind"] tells the
+    state builder to show positions instead of dates. Thresholds are rescaled by the
+    same factor, so P(value > threshold) is unchanged and answers map back onto the
+    original grid. Price series only, without related series.
+    """
+    if task.series.kind != "price" or task.related:
+        raise ValueError("blind_task supports price series without related series")
+    w = task.series.df.iloc[max(0, task.idx - window + 1):task.idx + 1].reset_index(drop=True)
+    k = 100.0 / float(w["close"].iloc[0])
+    s = Series(key=task.series.key, description=BLIND_DESCRIPTION, df=w.assign(close=w["close"] * k),
+               value_label=task.series.value_label, decimals=2, meta={"blind": True})
+    return ForecastTask(s, len(w) - 1, task.horizon, task.thresholds * k, task.sigmas, task.scale)
+
+
 # ── Monotone CDF from raw answers ─────────────────────────────────────────────
 
 def isotonic_decreasing(y, w=None) -> np.ndarray:
