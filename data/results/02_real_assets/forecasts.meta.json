@@ -1,0 +1,1242 @@
+{
+  "BTC|h=5": {
+    "n_rows": 1369,
+    "fingerprint": "f6b57e6878afa571",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "ETH|h=5": {
+    "n_rows": 1369,
+    "fingerprint": "d031f226fe0acf21",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "SPY|h=5": {
+    "n_rows": 939,
+    "fingerprint": "73d6f106c556607f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "AAPL|h=5": {
+    "n_rows": 939,
+    "fingerprint": "3c98375d16f4f34d",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "GLD|h=5": {
+    "n_rows": 939,
+    "fingerprint": "59885d8cdcc3394f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "USO|h=5": {
+    "n_rows": 939,
+    "fingerprint": "5416828560733c34",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "EURUSD|h=5": {
+    "n_rows": 973,
+    "fingerprint": "56507281a3edbabe",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  },
+  "USDJPY|h=5": {
+    "n_rows": 973,
+    "fingerprint": "1dd5f7b306f87c6b",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "timesfm2.5": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM25",
+          "checkpoint": "google/timesfm-2.5-200m-pytorch",
+          "max_context": 1024,
+          "max_horizon": 256,
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm2.5",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "kev-9b/threshold_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "kev-9b/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "kev-9b",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "kev-9b/threshold_noul"
+      },
+      "lev/direction_choice/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      },
+      "openjev/direction_noul/blind": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul/blind",
+        "blind": true,
+        "blind_window": 60
+      },
+      "openjev/direction_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "openjev",
+        "elicitation": {
+          "type": "DirectionNoul",
+          "template": "Will the {label} {horizon} be strictly above the current {value}?",
+          "name": "direction_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "openjev/direction_noul"
+      }
+    }
+  }
+}
