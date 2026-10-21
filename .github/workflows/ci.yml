@@ -32,7 +32,7 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Lint
-        run: ruff check src tests
+        run: ruff check src tests notebooks
 
       # Tests marked `server` need a local decision-model server; not available in CI.
       - name: Test
