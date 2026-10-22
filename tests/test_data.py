@@ -103,3 +103,64 @@ def test_ecb_rates_cross_through_the_euro(monkeypatch):
     assert len(usdjpy) == 2   # 2026-10-01 has no JPY fix
     assert usdjpy["close"].iloc[0] == pytest.approx(178.41 / 1.1355)
     assert data.load_ecb_rate("EUR", "USD")["close"].iloc[-1] == pytest.approx(1.14)
+
+
+class FakeTrends:
+    """Like Google Trends: each window rescaled to 0-100 by its own peak, rounded to integers."""
+
+    def __init__(self, interest: pd.Series):
+        self.interest, self.timeframes = interest, []
+
+    def build_payload(self, kw_list, cat, timeframe, geo):
+        self.term, self.timeframes = kw_list[0], [*self.timeframes, timeframe]
+
+    def interest_over_time(self):
+        lo, hi = self.timeframes[-1].split()
+        window = self.interest.loc[lo:hi]
+        return pd.DataFrame({self.term: (100 * window / window.max()).round().astype(int),
+                             "isPartial": False}, index=window.index.rename("date"))
+
+
+def test_google_trends_windows_are_stitched_into_one_scale():
+    days = pd.date_range("2024-01-01", "2024-12-31", freq="D")
+    rng = np.random.default_rng(3)
+    interest = pd.Series(1000 * np.exp(np.cumsum(rng.normal(0, 0.05, len(days)))), index=days)
+    interest.loc["2024-08-05"] *= 6   # a spike that dwarfs everything after it in its window
+    fake = FakeTrends(interest)
+    out = data.load_google_trends("yen", "2024-01-01", "2024-12-31", window=90, overlap=30, client=fake, pause=0)
+    assert fake.timeframes[:2] == ["2024-01-01 2024-03-30", "2024-03-01 2024-05-29"]
+    assert fake.timeframes[-1].endswith("2024-12-31")
+    assert out["t"].tolist() == list(days) and out["t"].dtype == "datetime64[ns]"
+    ratio = out["close"].to_numpy() / interest.to_numpy()
+    assert ratio.std() / ratio.mean() < 0.03   # one constant scale throughout, up to integer rounding
+
+
+def test_google_trends_refuses_a_window_without_searches():
+    days = pd.date_range("2024-01-01", "2024-04-30", freq="D")
+    interest = pd.Series(np.where(days < "2024-03-15", 50.0, 0.0), index=days)
+    interest.iloc[-1] = 10.0
+    with pytest.raises(ValueError, match="longer overlap"):
+        data.load_google_trends("x", days[0], days[-1], window=60, overlap=10, client=FakeTrends(interest),
+                                pause=0)
+
+
+def test_google_trends_waits_and_retries_when_throttled():
+    class Throttled(Exception):
+        response = type("R", (), {"status_code": 429})()
+
+    days = pd.date_range("2024-01-01", "2024-02-29", freq="D")
+    fake = FakeTrends(pd.Series(np.linspace(10, 20, len(days)), index=days))
+    answer, calls = fake.interest_over_time, []
+
+    def flaky():
+        calls.append(1)
+        if len(calls) == 1:
+            raise Throttled()
+        return answer()
+
+    fake.interest_over_time = flaky
+    out = data.load_google_trends("x", days[0], days[-1], client=fake, pause=0, waits=(0,))
+    assert len(calls) == 2 and len(out) == len(days)
+    fake.interest_over_time = lambda: (_ for _ in ()).throw(Throttled())
+    with pytest.raises(Throttled):
+        data.load_google_trends("x", days[0], days[-1], client=fake, pause=0, waits=(0,))

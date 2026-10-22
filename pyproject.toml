@@ -17,6 +17,8 @@ dependencies = [
 
 [project.optional-dependencies]
 yahoo = ["yfinance>=0.2.50"]
+# unmaintained; load_google_trends avoids its retry options, which break on urllib3 2
+trends = ["pytrends>=4.9.2"]
 # TimesFM 3.0 (package timesfm3) and 2.5 (package timesfm) ship in the same distribution
 tsfm = ["timesfm[torch]>=3.0.2,<4"]
 notebook = ["jupyterlab>=4.0", "ipykernel>=6.29"]

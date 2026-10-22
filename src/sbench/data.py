@@ -11,6 +11,7 @@ look-ahead (Series.available_at, known_rows).
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from io import StringIO
@@ -46,6 +47,7 @@ class CloseTime:
 BINANCE_DAILY_CLOSE = CloseTime("UTC", pd.Timedelta(hours=24))
 US_MARKET_CLOSE = CloseTime("America/New_York", pd.Timedelta(hours=16))       # NYSE / Nasdaq, ETFs included
 ECB_REFERENCE_FIX = CloseTime("Europe/Berlin", pd.Timedelta(hours=14, minutes=15))
+GOOGLE_TRENDS_DAY = CloseTime("UTC", pd.Timedelta(hours=48))   # day D taken as known at the end of D+1
 
 
 @dataclass
@@ -328,6 +330,67 @@ def load_ecb_rate(base: str, quote: str, start=None, end=None) -> pd.DataFrame:
     per_eur = raw.pivot(index="TIME_PERIOD", columns="CURRENCY", values="OBS_VALUE").dropna().assign(EUR=1.0)
     close = per_eur[quote] / per_eur[base]
     return normalize_series(pd.DataFrame({"t": close.index, "close": close.to_numpy()}))
+
+
+# ── Google Trends (search interest via pytrends, optional) ─────────────────────
+
+def _trends_window(client, term: str, cat: int, timeframe: str, geo: str, waits) -> pd.DataFrame:
+    """One Trends request; waits and retries while Google answers 429 (too many requests)."""
+    for wait in (*waits, None):
+        try:
+            client.build_payload([term], cat=cat, timeframe=timeframe, geo=geo)
+            return client.interest_over_time()
+        except Exception as e:
+            if wait is None or getattr(getattr(e, "response", None), "status_code", None) != 429:
+                raise
+            time.sleep(wait)
+
+
+def load_google_trends(term: str, start, end, window: int = 90, overlap: int = 30, cat: int = 0,
+                       geo: str = "", client=None, pause: float = 10.0,
+                       waits=(60, 300, 900)) -> pd.DataFrame:
+    """Daily worldwide search interest in `term`, stitched from overlapping windows (pip install pytrends).
+
+    Google returns daily values only for short windows, each rescaled to 0-100 by
+    its own peak, which may lie after any given day. Each window is chained to the
+    previous one by the ratio of their sums over the shared days, so the result is
+    the search interest times one unknown constant: use ratios between values
+    only, which carry no information from outside the days they compare.
+    cat: Google category (0 = all, 7 = Finance); geo: "" = worldwide.
+    pause: seconds between requests; waits: seconds to wait before each retry when throttled.
+    """
+    if client is None:
+        try:
+            from pytrends.request import TrendReq
+        except ImportError as e:
+            raise ImportError("load_google_trends needs pytrends: pip install pytrends") from e
+        client = TrendReq(hl="en-US", tz=0)   # no retries/backoff: pytrends 4.9 breaks on urllib3 2
+    if not 0 < overlap < window:
+        raise ValueError("need 0 < overlap < window")
+    start, end = pd.Timestamp(start).normalize(), pd.Timestamp(end).normalize()
+    stitched: pd.Series | None = None
+    lo = start
+    while True:
+        hi = min(lo + pd.Timedelta(days=window - 1), end)
+        got = _trends_window(client, term, cat, f"{lo:%Y-%m-%d} {hi:%Y-%m-%d}", geo, waits)
+        if got.empty or term not in got:
+            raise ValueError(f"Google Trends returned no data for {term!r} in {lo:%Y-%m-%d}..{hi:%Y-%m-%d}")
+        part = got[term].astype(float)
+        part.index = pd.DatetimeIndex(part.index).astype("datetime64[ns]")
+        if stitched is None:
+            stitched = part
+        else:
+            shared = stitched.index.intersection(part.index)
+            old, new = stitched.loc[shared].sum(), part.loc[shared].sum()
+            if old == 0 or new == 0:
+                raise ValueError(f"cannot chain {term!r} at {lo:%Y-%m-%d}: no searches in the shared days; "
+                                 "use a longer overlap")
+            stitched = pd.concat([stitched, part.loc[part.index > stitched.index[-1]] * (old / new)])
+        if hi >= end:
+            break
+        lo = hi - pd.Timedelta(days=overlap - 1)
+        time.sleep(pause)
+    return normalize_series(pd.DataFrame({"t": stitched.index, "close": stitched.to_numpy()}))
 
 
 # ── Alignment ──────────────────────────────────────────────────────────────────
