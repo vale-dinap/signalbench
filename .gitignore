@@ -23,6 +23,9 @@ outputs/
 # Per-forecast audit trails (state text, questions, answers): large, kept locally
 data/results/**/*.raw.jsonl
 
+# Raw downloads that snapshots are built from: large, re-downloadable
+data/raw/
+
 # Local / secrets
 .env
 .env.*
