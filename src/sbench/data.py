@@ -57,6 +57,8 @@ class Series:
     kind        : "price" (positive, unbounded; thresholds in log-return space)
                   or "probability" (bounded 0-1, e.g. a prediction-market Yes price;
                   thresholds in absolute-change space)
+                  or "covariate" (any real value, e.g. news coverage; only an input
+                  to other series' forecasts, never forecast itself)
     description : what the series is, shown at the top of the state
                   (e.g. the market question, or "Bitcoin / USDT spot")
     value_label : how questions refer to the value ("Yes price", "close price")
@@ -68,7 +70,7 @@ class Series:
     key: str
     description: str
     df: pd.DataFrame
-    kind: Literal["price", "probability"] = "price"
+    kind: Literal["price", "probability", "covariate"] = "price"
     value_label: str = "close price"
     unit: str = ""
     decimals: int | None = None
