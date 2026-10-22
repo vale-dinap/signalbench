@@ -7,6 +7,7 @@ series detail) are configured with functools.partial, e.g.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -15,6 +16,7 @@ import pandas as pd
 from .data import Series, known_rows
 
 if TYPE_CHECKING:
+    from .context import NewsFeed, SearchInterest
     from .forecast import ForecastTask
 
 
@@ -121,3 +123,21 @@ def build_indicator_state(task: ForecastTask, lookback: int = -1, related_lookba
     """build_price_state plus technical indicators at the decision time (indicator_lines)."""
     return "\n".join([build_price_state(task, lookback, related_lookback), "",
                       *indicator_lines(task.series, task.idx + 1)])
+
+
+def build_news_state(task: ForecastTask, feed: NewsFeed, lookback: int = -1) -> str:
+    """Price state plus news coverage and headlines known at the decision time (context.NewsFeed).
+
+    Related series are left out: in the news variant they carry TimesFM's news covariates.
+    """
+    return "\n".join([build_price_state(replace(task, related=()), lookback), "",
+                      *feed.lines(task.series.key, task.known_at)])
+
+
+def build_search_state(task: ForecastTask, interest: SearchInterest, lookback: int = -1) -> str:
+    """Price state plus Google search interest known at the decision time (context.SearchInterest).
+
+    Related series are left out: in the search variant they carry TimesFM's search covariates.
+    """
+    return "\n".join([build_price_state(replace(task, related=()), lookback), "",
+                      *interest.lines(task.series.key, task.known_at)])
