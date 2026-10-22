@@ -1,0 +1,530 @@
+{
+  "BTC|h=1": {
+    "n_rows": 1369,
+    "fingerprint": "f6b57e6878afa571",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "ETH|h=1": {
+    "n_rows": 1369,
+    "fingerprint": "d031f226fe0acf21",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "SPY|h=1": {
+    "n_rows": 939,
+    "fingerprint": "73d6f106c556607f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "AAPL|h=1": {
+    "n_rows": 939,
+    "fingerprint": "3c98375d16f4f34d",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "GLD|h=1": {
+    "n_rows": 939,
+    "fingerprint": "59885d8cdcc3394f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "USO|h=1": {
+    "n_rows": 939,
+    "fingerprint": "5416828560733c34",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "EURUSD|h=1": {
+    "n_rows": 957,
+    "fingerprint": "0917a303738d9749",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  },
+  "USDJPY|h=1": {
+    "n_rows": 957,
+    "fingerprint": "cebed04ef4b5be0e",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "random_walk": {
+        "type": "RandomWalkPredictor",
+        "window": 30,
+        "name": "random_walk"
+      },
+      "empirical": {
+        "type": "EmpiricalPredictor",
+        "window": 90,
+        "min_samples": 10,
+        "name": "empirical"
+      },
+      "timesfm3": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "TimesFM3",
+          "checkpoint": "google/timesfm-3.0-pytorch",
+          "timesfm": "3.0.2"
+        },
+        "name": "timesfm3",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      },
+      "clef/threshold_noul": {
+        "type": "DecisionModelPredictor",
+        "model": "clef",
+        "elicitation": {
+          "type": "ThresholdNoul",
+          "template": "Will the {label} {horizon} be strictly above {value}?",
+          "name": "threshold_noul"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "clef/threshold_noul"
+      },
+      "lev/direction_choice": {
+        "type": "DecisionModelPredictor",
+        "model": "lev",
+        "elicitation": {
+          "type": "DirectionChoice",
+          "include_flat": false,
+          "template": "Compared with now, where will the {label} be {horizon}?",
+          "name": "direction_choice"
+        },
+        "state_builder": "sbench.states.build_price_state(lookback=60)",
+        "name": "lev/direction_choice"
+      }
+    }
+  }
+}
