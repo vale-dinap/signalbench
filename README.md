@@ -4,24 +4,60 @@
 
 Benchmarking AI models as trading-signal sources: decision models, time-series foundation models and their combinations, scored on calibrated forecasts.
 
-> Work in progress.
+> Research in progress: notebooks 01 to 03 are complete; combinations (04) and a forward test on live data are next.
+
+## Findings so far
+
+| Notebook | Question | Answer |
+|---|---|---|
+| [01 · Synthetic series](notebooks/01_synthetic_series.ipynb) | Can the models see structure that is really there? | TimesFM 3.0 recovers about 80% of the achievable skill (CRPS skill +0.110 against the oracle's +0.137). No decision model beats the random walk on full distributions; most expect trends to reverse. |
+| [02 · Real assets](notebooks/02_real_assets.ipynb) | Does any of it carry over to real prices? | No predictor beats the random walk at a 5-day horizon on eight liquid instruments, 2024–2026. TimesFM ties it (−0.009, interval −0.022 to +0.004) and is well calibrated; every decision model is worse. |
+| [03 · Enrichment](notebooks/03_enrichment.ipynb) | Does added information create skill? | No. Related assets, technical indicators, news and search interest leave TimesFM unchanged. Decision models gain from summaries (indicators, search ratios) by losing a bearish lean, and lose from raw headlines, which make them more confident without making them more right. |
+
+In more detail:
+
+- **The test bed works.** On synthetic series with known distributions, an oracle wins and ties the random walk where nothing is predictable, so differences come from the predictors, not the scoring (01).
+- **How a decision model is asked matters as much as which model.** The same model's Brier skill ranges from −0.48 to −0.01 across four ways of asking the same question, with no format best for all; formats are therefore fixed per model on synthetic data, before any real outcome is seen (01).
+- **Real prices leave little to forecast at one and five days.** Prices showed neither momentum nor reversal; no direction forecast beat even a naive base rate of how often prices rose (02).
+- **Names and dates help decision models, and recall of the test period does not explain it.** A blinded state (no name, no dates, prices rebased) is the conservative result; the named state's advantage is unchanged after the models' base release, where recall is impossible (02, 03).
+- **News hurts decision models as forecasters.** At a 1-day horizon, headlines widen lev's P(up) from a standard deviation of 0.069 to 0.168 and cost it 0.132 in Brier skill against its own price-only answers, while its hit rate stays below 50%. Headlines describe moves already in the price at the decision time (03).
+
+![CRPS skill on real prices](docs/figures/02_real_assets_crps_skill.png)
+
+![News and search interest at a 1-day horizon](docs/figures/03_news_search_h1.png)
 
 ## Approach
 
 Every model is reduced to the same output: the probability that an instrument's value at a given horizon will be above each of a grid of thresholds around the current value. That makes very different models directly comparable:
 
-- **Decision models** (Jev-style "System One" models served via llama.cpp `/v1/systemone`) answer one yes/no probability question per threshold.
-- **Time-series foundation models** (e.g. Google TimesFM) produce quantile forecasts, which are mapped onto the same thresholds.
+- **Decision models** (Jev-style "System One" models served via llama.cpp `/v1/systemone`) answer yes/no probability questions, asked in one of several elicitation formats.
+- **Time-series foundation models** (Google TimesFM 3.0, and 2.5 as a reference) produce quantile forecasts, which are mapped onto the same thresholds; related series, news and search interest enter as past-only covariates.
 - **Baselines** (random walk, empirical distribution of past changes) set the bar to beat.
 
-Forecasts are scored with Brier score, normalised CRPS, direction accuracy, interval coverage and answer coherence, always relative to the random-walk baseline with bootstrap confidence intervals.
+Forecasts are scored with normalised CRPS, Brier score on P(up), interval coverage and answer coherence, always relative to the random walk on the same decision points, with paired bootstrap confidence intervals.
+
+**Look-ahead controls.** Every input is aligned on when it became known, not on its date label: each series carries its close time (Binance midnight UTC, US market close in New York, the ECB's 14:15 Frankfurt fixing), news files count from 15 minutes after their time stamp, a Google Trends day from the end of the next day, and Trends' per-request rescaling is removed by using ratios only. Because the decision models' training cutoffs are not published, recall is controlled separately: a blinded state, and comparisons before and after the models' base release.
+
+## Data
+
+| Source | Used for | Access |
+|---|---|---|
+| Binance | BTC, ETH daily closes | public API |
+| Yahoo Finance | SPY, AAPL, GLD, USO (ETFs rather than futures, which jump at contract rolls) | `yfinance` |
+| ECB reference rates | EUR/USD, USD/JPY at a fixed daily time | public API |
+| GDELT Global Knowledge Graph | news coverage, tone and headlines | raw 15-minute files (`python -m sbench.news`) |
+| Google Trends | daily search interest | `pytrends`, stitched from overlapping windows |
+
+Snapshots of everything the notebooks use are committed under `data/snapshots/`, so results reproduce without network access. The raw news store (about 200 MB) is not committed; `python -m sbench.news 2023-12-01 2026-09-30 data/raw/gkg` rebuilds it.
 
 ## Layout
 
 ```
-src/sbench/        package (`import sbench`): data loaders, state builders, predictors, backtest, scoring
+src/sbench/        package (`import sbench`): data loaders, context sources, state builders, predictors,
+                   backtest, scoring, plots
 notebooks/         research notebooks (narrative, experiments, results)
-data/              cached price histories and model results (committed for reproducibility)
+data/              snapshots and model results (committed for reproducibility); raw downloads (not committed)
+docs/figures/      charts shown in this README
 tests/             pytest suite
 outputs/           generated charts (not committed)
 ```
@@ -43,3 +79,10 @@ TimesFM (3.0, plus 2.5 as the previous-generation reference) is optional. Instal
 pip install torch --index-url https://download.pytorch.org/whl/cu130   # GPU; skip for CPU-only
 pip install -e ".[tsfm]"
 ```
+
+Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed to rebuild snapshots.
+
+## Next
+
+- **04 · Combinations:** decision models as feature extractors (turning headlines into covariates for TimesFM rather than forecasting from them), ensembles, and gating on agreement.
+- **Forward test:** live scoring on data no model can have seen, including the Bollinger-band reversal noted in 02, the news variant and prediction markets.
