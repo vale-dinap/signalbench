@@ -4,7 +4,7 @@
 
 Benchmarking AI models as trading-signal sources: decision models, time-series foundation models and their combinations, scored on calibrated forecasts.
 
-> Research in progress: notebooks 01 to 03 are complete; combinations (04) and a forward test on live data are next.
+> Research in progress: notebooks 01 to 04 are complete; a forward test on live data is next.
 
 ## Findings so far
 
@@ -13,6 +13,7 @@ Benchmarking AI models as trading-signal sources: decision models, time-series f
 | [01 · Synthetic series](notebooks/01_synthetic_series.ipynb) | Can the models see structure that is really there? | TimesFM 3.0 recovers about 80% of the achievable skill (CRPS skill +0.110 against the oracle's +0.137). No decision model beats the random walk on full distributions; most expect trends to reverse. |
 | [02 · Real assets](notebooks/02_real_assets.ipynb) | Does any of it carry over to real prices? | No predictor beats the random walk at a 5-day horizon on eight liquid instruments, 2024–2026. TimesFM ties it (−0.009, interval −0.022 to +0.004) and is well calibrated; every decision model is worse. |
 | [03 · Enrichment](notebooks/03_enrichment.ipynb) | Does added information create skill? | No. Related assets, technical indicators, news and search interest leave TimesFM unchanged. Decision models gain from summaries (indicators, search ratios) by losing a bearish lean, and lose from raw headlines, which make them more confident without making them more right. |
+| [04 · Combinations](notebooks/04_combinations.ipynb) | Can decision models add to TimesFM? | No. Pools and agreement gates with TimesFM stay within ±0.01 of it. As headline readers they rate news sensibly (their ratings track the move already made), but their news score has no information coefficient with the next return (−0.005, interval −0.075 to +0.064). |
 
 In more detail:
 
@@ -21,6 +22,8 @@ In more detail:
 - **Real prices leave little to forecast at one and five days.** Prices showed neither momentum nor reversal; no direction forecast beat even a naive base rate of how often prices rose (02).
 - **Names and dates help decision models, and recall of the test period does not explain it.** A blinded state (no name, no dates, prices rebased) is the conservative result; the named state's advantage is unchanged after the models' base release, where recall is impossible (02, 03).
 - **News hurts decision models as forecasters.** At a 1-day horizon, headlines widen lev's P(up) from a standard deviation of 0.069 to 0.168 and cost it 0.132 in Brier skill against its own price-only answers, while its hit rate stays below 50%. Headlines describe moves already in the price at the decision time (03).
+- **Diversity without skill does not combine into skill.** TimesFM's P(up) correlates at most 0.14 with any decision model's, yet the best pool, with its weight fitted out of sample, gains only +0.003 in CRPS skill over TimesFM (−0.007 to +0.013) (04).
+- **Read as sentiment, news is already priced.** Asked only how good or bad each headline is, the models' ratings follow the size of the past move (IC up to +0.26) but not the direction of the next one; their link to the next move's size is mostly cross-asset volatility (04).
 
 ![CRPS skill on real prices](docs/figures/02_real_assets_crps_skill.png)
 
@@ -84,5 +87,4 @@ Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed t
 
 ## Next
 
-- **04 · Combinations:** decision models as feature extractors (turning headlines into covariates for TimesFM rather than forecasting from them), ensembles, and gating on agreement.
 - **Forward test:** scoring on November 2026 to April 2027, a period no model or hypothesis here can reflect, against hypotheses registered in advance, including the news effect and the Bollinger-band reversal noted in 02, plus prediction markets: see the [pre-registered plan](docs/forward_test_plan.md).
