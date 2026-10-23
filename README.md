@@ -6,6 +6,18 @@ Benchmarking AI models as trading-signal sources: decision models, time-series f
 
 > Research in progress: notebooks 01 to 04 are complete; a forward test on live data is next.
 
+## Bottom line
+
+Language models and time-series foundation models are increasingly proposed as sources of trading signals. This project tests that proposal under controls such claims usually lack: every input aligned on when it became known, comparisons before and after the models' release, and paired intervals against the random walk.
+
+**At daily horizons (1 and 5 days) on eight liquid instruments, none of the models tested provides a usable signal of where prices go next.**
+
+- **TimesFM 3.0** forecasts calibrated distributions that tie the random walk (CRPS skill −0.009, interval −0.022 to +0.004). That makes it usable as a risk input, such as interval or position sizing, but not as a source of returns.
+- **The decision models tested** are worse than the random walk as forecasters, and headlines make them worse. Combined with TimesFM they add nothing measurable (+0.003, −0.007 to +0.013).
+- **As headline readers** the decision models do understand the news: their ratings track the move just made. But their news score has no information coefficient with the next return (−0.005, −0.075 to +0.064). Studies that find LLM sentiment predicting next-day returns (Lopez-Lira and Tang, 2023) locate the effect in small stocks and in news released after the close; with liquid instruments and news known before the decision time, none remains.
+
+These results do not cover less-covered assets, intraday horizons, news timed to the minute, volatility forecasting (04 found a weak lead, not a result) or prediction markets. They are provisional until the [forward test](docs/forward_test_plan.md) scores the same models, frozen, on November 2026 to April 2027, which also includes an exploratory test on prediction markets.
+
 ## Findings so far
 
 | Notebook | Question | Answer |
