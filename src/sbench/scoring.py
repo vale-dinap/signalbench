@@ -160,3 +160,28 @@ def reliability(results: pd.DataFrame, bins: int = 10, sigma0_only: bool = False
     return (r.groupby(["predictor", "bin"], observed=True)
              .agg(n=("outcome", "size"), forecast=("p_above", "mean"), observed=("outcome", "mean"))
              .reset_index())
+
+
+def rank_ic(df: pd.DataFrame, x: str, y: str, date: str = "t", n: int = 2000, alpha: float = 0.05,
+            seed: int = 0) -> dict:
+    """Information coefficient: rank correlation of a signal `x` with an outcome `y`, with a bootstrap interval.
+
+    The bootstrap resamples dates, keeping every instrument of a date together, so
+    the interval allows for moves shared across instruments on the same day.
+    Returns ic, lo, hi, N (rows) and dates.
+    """
+    d = df[[x, y, date]].dropna()
+    if len(d) < 3:
+        return {"ic": np.nan, "lo": np.nan, "hi": np.nan, "N": len(d), "dates": d[date].nunique()}
+    rx, ry = d[x].rank().to_numpy(), d[y].rank().to_numpy()
+    ic = float(np.corrcoef(rx, ry)[0, 1])
+    groups = d.groupby(date).indices
+    blocks = list(groups.values())
+    rng = np.random.default_rng(seed)
+    boot = []
+    for _ in range(n):
+        idx = np.concatenate([blocks[i] for i in rng.integers(0, len(blocks), len(blocks))])
+        bx, by = pd.Series(d[x].to_numpy()[idx]).rank(), pd.Series(d[y].to_numpy()[idx]).rank()
+        boot.append(np.corrcoef(bx, by)[0, 1])
+    lo, hi = np.nanquantile(boot, [alpha / 2, 1 - alpha / 2])
+    return {"ic": ic, "lo": float(lo), "hi": float(hi), "N": len(d), "dates": len(blocks)}
