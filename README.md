@@ -41,6 +41,8 @@ In more detail:
 
 ![News and search interest at a 1-day horizon](docs/figures/03_news_search_h1.png)
 
+![Headline readers' information coefficients](docs/figures/04_reader_ic.png)
+
 ## Approach
 
 Every model is reduced to the same output: the probability that an instrument's value at a given horizon will be above each of a grid of thresholds around the current value. That makes very different models directly comparable:
@@ -69,7 +71,7 @@ Snapshots of everything the notebooks use are committed under `data/snapshots/`,
 
 ```
 src/sbench/        package (`import sbench`): data loaders, context sources, state builders, predictors,
-                   backtest, scoring, plots
+                   headline readers, backtest, combinations, scoring, plots
 notebooks/         research notebooks (narrative, experiments, results)
 data/              snapshots and model results (committed for reproducibility); raw downloads (not committed)
 docs/figures/      charts shown in this README
