@@ -85,4 +85,4 @@ Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed t
 ## Next
 
 - **04 · Combinations:** decision models as feature extractors (turning headlines into covariates for TimesFM rather than forecasting from them), ensembles, and gating on agreement.
-- **Forward test:** live scoring on data no model can have seen, including the Bollinger-band reversal noted in 02, the news variant and prediction markets.
+- **Forward test:** scoring on November 2026 to April 2027, a period no model or hypothesis here can reflect, against hypotheses registered in advance, including the news effect and the Bollinger-band reversal noted in 02, plus prediction markets: see the [pre-registered plan](docs/forward_test_plan.md).

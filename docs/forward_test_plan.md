@@ -1,0 +1,70 @@
+# Forward test: pre-registered plan
+
+This plan fixes, before the forward period begins, what the forward test will measure and how its results will be judged. The commit that adds this file dates it. Notebooks 01 to 03 use data up to 30 September 2026 only, and no later data had been looked at when the plan was written.
+
+## Why a forward test
+
+Notebooks 02 and 03 control look-ahead with blinded states and comparisons before and after the decision models' release, but they test on a period that some models may have seen, and their hypotheses were partly formed on that same period (for example, the Bollinger reversal noted after 02). The forward test removes both problems: the period starts after every model file below was obtained (the latest on 15 October 2026) and after this plan, so neither the models nor the hypotheses can reflect it.
+
+No daily collection is needed: every source keeps an archive (Binance and ECB histories, Yahoo closes, GDELT's GKG files, Google Trends, Polymarket price histories), so the test is run once the period has passed, with the same code.
+
+## Period and timing
+
+- **Forward period:** 1 November 2026 to 30 April 2027. It starts after the plan and after the latest model file, not on 1 October: a model file published in mid-October could in principle have been trained on early-October data.
+- **Evaluation:** once all outcomes in the period are known (early May 2027), in a new notebook `05_forward_test`.
+- **Update:** the same analysis repeated over 1 November 2026 to 31 October 2027 for the hypotheses flagged as low-power below. The first evaluation is reported regardless of the update.
+
+## What is frozen
+
+**Models** (local GGUF files, identified by SHA-256; a different file means a different model and is not part of this test):
+
+| Model | File | Size (bytes) | SHA-256 |
+|---|---|---|---|
+| clef | `ggml-org/Clef-GGUF/Clef-Q4_K_M.gguf` | 19,232,219,200 | `9997675e4c9e9016273372b5fdedbdda7ad14285bc722949e4b9daca62bf3822` |
+| lev | `ggml-org/lev-GGUF/lev-Q4_K_M.gguf` | 3,011,777,440 | `3f61b27c00a098dbc79ed099cca3985cbe0b63d17ac7fedebf2dca1d84f7f3a8` |
+| kev-9b | `ggml-org/Kev-9B-GGUF/Kev-9B-Q4_K_M.gguf` | 6,358,923,744 | `86a6084984a6ef6818eb12c07cdc67ed3c47b00208d41a8816c64301bc6bcbda` |
+
+**TimesFM:** `google/timesfm-3.0-pytorch` at Hugging Face revision `43046b85ec22d584a13f8098c2ed39c889e129c2`, run with the `timesfm` package 3.0.2.
+
+**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), state builders (`sbench.states`, `sbench.context`) and predictors as of the commit that adds this file. Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
+
+**Configuration,** as in 03: the same eight instruments (BTC, ETH from Binance; SPY, AAPL, GLD, USO from Yahoo; EUR/USD and USD/JPY from ECB reference rates), the same close times, the threshold grid at ±0.5 to ±2 recent standard deviations, 60 closes in the decision models' state, the same related series, news parameters (24 hours, 15 instrument headlines, 5 macro headlines, 30-day baseline) and search terms. Decision models use the named state.
+
+## Decision points
+
+- **Horizon 1:** every trading day of each instrument in the period (about 1,000 points).
+- **Horizon 5:** every fifth observation of each instrument in the period (about 200 points).
+- A decision point needs its outcome inside the period. Points without news (archive gaps) are left out of every comparison that involves the news variant, for all predictors alike.
+
+## Hypotheses
+
+Each comparison is paired on decision points, uses skill = 1 − mean score / mean score of the reference, and a 95% paired bootstrap interval (2,000 resamples, seed 0), as in 02 and 03. "Holds" means the interval lies entirely on the stated side of zero; "fails" means the point estimate is on the other side; anything else is "inconclusive".
+
+| | Hypothesis (from) | Comparison | Metric | Holds if |
+|---|---|---|---|---|
+| H1 | No predictor beats the random walk on real prices (02, 03) | every predictor vs random walk, horizons 1 and 5 | CRPS (distributions), Brier on P(up) (direction) | no predictor's interval lies entirely above 0 |
+| H2 | News makes lev worse (03) | `lev/direction_choice+news` vs `lev/direction_choice`, horizon 1 | Brier on P(up) | interval below 0 |
+| H3 | News makes clef worse (03) | `clef/threshold_noul+news` vs `clef/threshold_noul`, horizon 1 | CRPS | interval below 0 |
+| H4 | News makes the decision models more confident (03) | same pairs as H2 and H3, horizon 1 | standard deviation of P(up), news minus price only | interval above 0 for both models |
+| H5 | Search ratios improve clef's direction answers (03) | `clef/threshold_noul+search` vs `clef/threshold_noul`, horizon 1 | Brier on P(up) | interval above 0 |
+| H6 | Indicators improve kev-9b (03) | `kev-9b/threshold_noul+indicators` vs `kev-9b/threshold_noul`, horizon 5 | CRPS | interval above 0 |
+| H7 | Prices revert from the Bollinger bands (02) | realised up-rate on %B (20 days, 2 sd) at decision points, horizon 5, pooled | slope of a linear fit of up (1/0) on %B, per standard deviation of %B | interval below 0 |
+
+TimesFM's covariates (related assets, news, search interest) are reported as estimates with intervals, without a hypothesis: 03 found no effect in either direction, and an absence of effect cannot be confirmed by an interval.
+
+**Power.** At horizon 1 the intervals in 03 were about ±0.01 in CRPS skill and ±0.01 to ±0.035 in Brier skill on about 1,300 points; the forward test has about 1,000, so H2, H3 and H5 have enough points to detect effects of the size found in 03 (H5 only just: 03's effect was +0.012, interval +0.002 to +0.022). H6 and H7 rely on about 200 horizon-5 points: 03's H6 effect (+0.026, interval +0.016 to +0.036 on 1,228 points) should still be visible, but the Bollinger slope found after 02 (−0.029 per standard deviation of %B, interval −0.057 to −0.004 on 1,232 points) would not be distinguishable from zero on 200. H6 and H7 are therefore also evaluated at the 12-month update, and an inconclusive first result for them is expected, not a failure.
+
+**Multiple comparisons.** Seven hypotheses are tested, each one-sided at 2.5%: if none were true, about one run in six would still show at least one false "holds". Every hypothesis is reported with its interval, whatever the outcome; none is dropped or reworded after the data is seen.
+
+## Prediction markets (exploratory)
+
+Prediction markets were held out of 02 because resolved questions can be recalled; markets that resolve in the forward period cannot have been seen by any model above. The test is exploratory (no hypothesis), with its selection fixed here:
+
+- **Markets:** binary Polymarket markets from the 200 highest-volume closed events whose end date falls in the forward period, with at least 30 days of daily price history before the forecast time.
+- **Question:** the Yes price at resolution (1 or 0), asked 7 days before the end date, with the market question and its price history in the state.
+- **Predictors:** clef (`threshold_noul`) and lev (`direction_choice`); the market price itself as the reference (the random walk on a probability series), as the bar to beat.
+- **Metric:** Brier score of P(Yes) against the outcome, as skill relative to the market price.
+
+## Deviations
+
+Anything done differently from this plan (a data source that changed, a model file that could not be used, a bug fix in frozen code) will be listed in `05_forward_test` with its reason and, where possible, the result under both the plan and the deviation.
