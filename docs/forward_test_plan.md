@@ -1,6 +1,6 @@
 # Forward test: pre-registered plan
 
-This plan fixes, before the forward period begins, what the forward test will measure and how its results will be judged. The commit that adds this file dates it. Notebooks 01 to 03 use data up to 30 September 2026 only, and no later data had been looked at when the plan was written.
+This plan fixes, before the forward period begins, what the forward test will measure and how its results will be judged. The commit that adds this file dates it. Notebooks 01 to 04 use data up to 30 September 2026 only, and no later data had been looked at when the plan was written. The section on headline readers was added after notebook 04, on 23 October 2026, still before the forward period.
 
 ## Why a forward test
 
@@ -26,7 +26,7 @@ No daily collection is needed: every source keeps an archive (Binance and ECB hi
 
 **TimesFM:** `google/timesfm-3.0-pytorch` at Hugging Face revision `43046b85ec22d584a13f8098c2ed39c889e129c2`, run with the `timesfm` package 3.0.2.
 
-**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), state builders (`sbench.states`, `sbench.context`) and predictors as of the commit that adds this file. Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
+**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), headline readers (`sbench.headlines`), state builders (`sbench.states`, `sbench.context`) and predictors as of the commit that adds the section on headline readers (the modules frozen earlier only gained additions in it: `rank_ic` and `sbench.headlines`). Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
 
 **Configuration,** as in 03: the same eight instruments (BTC, ETH from Binance; SPY, AAPL, GLD, USO from Yahoo; EUR/USD and USD/JPY from ECB reference rates), the same close times, the threshold grid at ±0.5 to ±2 recent standard deviations, 60 closes in the decision models' state, the same related series, news parameters (24 hours, 15 instrument headlines, 5 macro headlines, 30-day baseline) and search terms. Decision models use the named state.
 
@@ -55,6 +55,15 @@ TimesFM's covariates (related assets, news, search interest) are reported as est
 **Power.** At horizon 1 the intervals in 03 were about ±0.01 in CRPS skill and ±0.01 to ±0.035 in Brier skill on about 1,300 points; the forward test has about 1,000, so H2, H3 and H5 have enough points to detect effects of the size found in 03 (H5 only just: 03's effect was +0.012, interval +0.002 to +0.022). H6 and H7 rely on about 200 horizon-5 points: 03's H6 effect (+0.026, interval +0.016 to +0.036 on 1,228 points) should still be visible, but the Bollinger slope found after 02 (−0.029 per standard deviation of %B, interval −0.057 to −0.004 on 1,232 points) would not be distinguishable from zero on 200. H6 and H7 are therefore also evaluated at the 12-month update, and an inconclusive first result for them is expected, not a failure.
 
 **Multiple comparisons.** Seven hypotheses are tested, each one-sided at 2.5%: if none were true, about one run in six would still show at least one false "holds". Every hypothesis is reported with its interval, whatever the outcome; none is dropped or reworded after the data is seen.
+
+## Headline readers (exploratory)
+
+Notebook 04 asked lev and clef to rate each headline for an instrument's price on five levels, and found that their news score does not predict the next return, while their intensity (mean absolute rating) rose with the size of the next move. Within each instrument that link was close to zero at horizon 1 from March 2026, and small at horizon 5 over 2024–2026 (IC about +0.07, lower bound about +0.01), a period the models may have seen. The forward period is the first test the models cannot have seen. It has too few horizon-5 points to confirm an effect of that size, so these are reported as estimates with intervals, without a hypothesis:
+
+- **Readers:** lev and clef, with `HeadlineReader`'s question and levels as frozen above, on the decision points and headlines of the news variant (15 instrument headlines from the last 24 hours).
+- **News score:** IC with the return over the following horizon, horizons 1 and 5.
+- **Intensity:** IC with the size of the next move, using percentile ranks within each instrument, and IC with the part of that size left unexplained by the past move's size and the trailing 60-observation volatility (a regression on ranks, per instrument), horizons 1 and 5.
+- **Interval:** 95% bootstrap resampling dates (2,000 resamples, seed 0), as `sbench.scoring.rank_ic`.
 
 ## Prediction markets (exploratory)
 
