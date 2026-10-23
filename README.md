@@ -8,7 +8,7 @@ Benchmarking AI models as trading-signal sources: decision models, time-series f
 
 ## Bottom line
 
-Language models and time-series foundation models are increasingly proposed as sources of trading signals. This project tests that proposal under controls such claims usually lack: every input aligned on when it became known, comparisons before and after the models' release, and paired intervals against the random walk.
+Language models and time-series foundation models are increasingly proposed as sources of trading signals. This project tests whether they are, with three safeguards that such claims often skip: each model sees only information available at the time of the forecast, results are compared before and after the models were released (outcomes after the release cannot have been memorised), and every model is scored against a random walk with confidence intervals.
 
 **At daily horizons (1 and 5 days) on eight liquid instruments, none of the models tested provides a usable signal of where prices go next.**
 
