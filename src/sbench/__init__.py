@@ -3,7 +3,7 @@
 Modules
 -------
 data        : Series container, loaders (Polymarket, Binance, Yahoo, ECB, Google Trends), caching, alignment
-panel       : the eight-instrument panel of notebooks 03 onward, from committed snapshots
+panel       : the eight-instrument panel of notebooks 03 onward: committed snapshots, or fresh downloads
 synthetic   : synthetic price series with known conditional distributions, and the oracle
 news        : GDELT GKG raw-file collector (news coverage, tone, headlines)
 context     : news and search-interest context known at a decision time
@@ -18,5 +18,6 @@ backtest    : resumable forecast backtests (long-format CSV + run metadata + raw
 combine     : linear pools and agreement gates over stored forecasts
 markets     : prediction markets as questions: will a market resolve Yes? Selection, runner, scoring
 scoring     : Brier / log loss / CRPS / direction / coverage metrics with bootstrap CIs; rank IC
+hypotheses  : verdicts on pre-registered hypotheses; paired bootstrap for non-skill statistics
 plots       : house style and the recurring chart types
 """
