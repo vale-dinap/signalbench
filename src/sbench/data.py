@@ -243,6 +243,27 @@ def fetch_polymarket_binary_markets(
     return markets
 
 
+def fetch_polymarket_closed_events(start, end, n: int = 200, page: int = 100) -> list[dict]:
+    """The `n` highest-volume closed events whose end date falls in [start, end], as raw API dicts.
+
+    Pages through the events endpoint in descending volume, so the result does not
+    depend on the page size. Dates are UTC; end is inclusive to the end of its day.
+    """
+    lo, hi = _utc_naive(start), _utc_naive(end) + pd.Timedelta(days=1)
+    events, offset = [], 0
+    while len(events) < n:
+        params = {"closed": "true", "order": "volume", "ascending": "false", "limit": page, "offset": offset,
+                  "end_date_min": lo.strftime("%Y-%m-%d"), "end_date_max": hi.strftime("%Y-%m-%d")}
+        r = requests.get(POLYMARKET_EVENTS_URL, params=params, timeout=30)
+        r.raise_for_status()
+        batch = r.json()
+        if not batch:
+            break
+        events += [e for e in batch if e.get("endDate") and lo <= _utc_naive(e["endDate"]) < hi]
+        offset += len(batch)
+    return events[:n]
+
+
 def load_polymarket_history(token_id: str, fidelity: int = 1440, interval: str = "all") -> pd.DataFrame:
     """Yes-token price history. fidelity is in minutes (1440 = daily)."""
     params = {"market": token_id, "interval": interval, "fidelity": fidelity}

@@ -54,6 +54,23 @@ def test_closed_markets_are_binary_resolved_and_sorted_by_volume(fake_events):
     assert fake_events[0]["end_date_min"] == "2024-01-01"
 
 
+def test_closed_events_page_by_volume_and_keep_end_dates_in_the_window(monkeypatch):
+    pages = [[{"title": "a", "endDate": "2026-11-03T00:00:00Z"}, {"title": "early", "endDate": "2026-10-20T00:00:00Z"}],
+             [{"title": "b", "endDate": "2027-04-30T23:00:00Z"}, {"title": "no date"}],
+             [{"title": "c", "endDate": "2026-12-01T00:00:00Z"}], []]
+    calls = []
+
+    def get(url, params, timeout):
+        calls.append(params)
+        return FakeResponse(pages[params["offset"] // 2] if params["offset"] < 6 else [])
+
+    monkeypatch.setattr(data.requests, "get", get)
+    out = data.fetch_polymarket_closed_events("2026-11-01", "2027-04-30", n=2, page=2)
+    assert [e["title"] for e in out] == ["a", "b"]
+    assert [c["offset"] for c in calls] == [0, 2]
+    assert calls[0]["order"] == "volume" and calls[0]["end_date_max"] == "2027-05-01"
+
+
 def test_active_markets_by_default(fake_events):
     out = data.fetch_polymarket_binary_markets()
     assert [m["question"] for m in out] == ["Still open"]
