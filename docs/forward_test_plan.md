@@ -1,6 +1,6 @@
 # Forward test: pre-registered plan
 
-This plan fixes, before the forward period begins, what the forward test will measure and how its results will be judged. The commit that adds this file dates it. Notebooks 01 to 04 use data up to 30 September 2026 only, and no later data had been looked at when the plan was written. The section on headline readers was added after notebook 04, on 23 October 2026, still before the forward period.
+This plan fixes, before the forward period begins, what the forward test will measure and how its results will be judged. The commit that adds this file dates it. Notebooks 01 to 04 use data up to 30 September 2026 only, and no later data had been looked at when the plan was written. The section on headline readers was added after notebook 04, on 23 October 2026, and the prediction-market rules were made precise on 24 October 2026, both before the forward period.
 
 ## Why a forward test
 
@@ -26,7 +26,7 @@ No daily collection is needed: every source keeps an archive (Binance and ECB hi
 
 **TimesFM:** `google/timesfm-3.0-pytorch` at Hugging Face revision `43046b85ec22d584a13f8098c2ed39c889e129c2`, run with the `timesfm` package 3.0.2.
 
-**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), headline readers (`sbench.headlines`), state builders (`sbench.states`, `sbench.context`) and predictors as of the commit that adds the section on headline readers (the modules frozen earlier only gained additions in it: `rank_ic` and `sbench.headlines`). Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
+**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), headline readers (`sbench.headlines`), prediction-market questions (`sbench.markets`), state builders (`sbench.states`, `sbench.context`) and predictors as of the commit that makes the prediction-market rules precise (since the original plan, the modules frozen then only gained additions: `rank_ic`, `sbench.headlines` and `sbench.markets`). Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
 
 **Configuration,** as in 03: the same eight instruments (BTC, ETH from Binance; SPY, AAPL, GLD, USO from Yahoo; EUR/USD and USD/JPY from ECB reference rates), the same close times, the threshold grid at ±0.5 to ±2 recent standard deviations, 60 closes in the decision models' state, the same related series, news parameters (24 hours, 15 instrument headlines, 5 macro headlines, 30-day baseline) and search terms. Decision models use the named state.
 
@@ -69,10 +69,11 @@ Notebook 04 asked lev and clef to rate each headline for an instrument's price o
 
 Prediction markets were held out of 02 because resolved questions can be recalled; markets that resolve in the forward period cannot have been seen by any model above. The test is exploratory (no hypothesis), with its selection fixed here:
 
-- **Markets:** binary Polymarket markets from the 200 highest-volume closed events whose end date falls in the forward period, with at least 30 days of daily price history before the forecast time.
-- **Question:** the Yes price at resolution (1 or 0), asked 7 days before the end date, with the market question and its price history in the state.
-- **Predictors:** clef (`threshold_noul`) and lev (`direction_choice`); the market price itself as the reference (the random walk on a probability series), as the bar to beat.
-- **Metric:** Brier score of P(Yes) against the outcome, as skill relative to the market price.
+- **Events:** the 200 highest-volume closed Polymarket events whose end date falls in the forward period.
+- **Markets:** from each event, the highest-volume market that is binary (Yes/No), resolved, still open at the forecast time (a market that closed earlier asks about a known result) and has at least 30 daily prices at or before the forecast time. One market per event, so that events with many related markets (one per candidate, say) do not dominate; an event without such a market is left out.
+- **Question:** whether the market resolves Yes, asked 7 days before the market's end date. The state holds the market question, its resolution date and the last 60 daily Yes prices up to the forecast time; P(Yes) is asked as the probability that the Yes price is above 0.50 at the end date.
+- **Predictors:** clef and lev, both with `threshold_noul` at that single threshold. lev's own format (`direction_choice`) answers whether the price will be higher than now, not whether the market resolves Yes; its format was chosen in 01 for price grids, so this is a stated exception, not a deviation. The market price at the forecast time is the reference, as the bar to beat.
+- **Metric:** Brier score of P(Yes) against the outcome, as skill relative to the market price, with a 95% paired bootstrap interval over markets (`sbench.markets`, `sbench.scoring.skill_table`).
 
 ## Deviations
 
