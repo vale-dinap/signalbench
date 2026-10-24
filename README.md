@@ -18,6 +18,28 @@ Language models and time-series foundation models are increasingly proposed as s
 
 These results do not cover less-covered assets, intraday horizons, news timed to the minute, volatility forecasting (04 found a weak lead, not a result) or prediction markets. They are provisional until the [forward test](docs/forward_test_plan.md) scores the same models, frozen, on November 2026 to April 2027, which also includes an exploratory test on prediction markets.
 
+## Models
+
+All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. The forward test uses clef, lev and kev-9b, frozen by file hash.
+
+| Model | Params | Base model | Build | Licence | Used in |
+|---|---|---|---|---|---|
+| [`julia-1`](https://huggingface.co/ggml-org/Julia-1-GGUF) | 0.1 B | mmBERT-small (ModernBERT family) | Q8_0 | Apache 2.0 | 01 |
+| [`laya`](https://huggingface.co/ggml-org/Laya-GGUF) | 0.4 B | ModernBERT-large | Q8_0 | Apache 2.0 | 01, 03 |
+| [`d1-omni-600m`](https://huggingface.co/LiquidAI/d1-omni-600M-GGUF) | 0.6 B | LFM2.5-Encoder-350M (Liquid AI) | Q8_0 | LFM Open License 1.0 | 01 |
+| [`d1-3b`](https://huggingface.co/LiquidAI/d1-3B-GGUF) | 3 B | LFM2.5-VL-3B (Liquid AI) | Q4_K_M | LFM Open License 1.0 | 01 |
+| [`kev-4b`](https://huggingface.co/ggml-org/Kev-4B-GGUF) | 4 B | Qwen3.5-4B-Base | Q4_K_M | Apache 2.0 | 01 |
+| [`lev`](https://huggingface.co/ggml-org/lev-GGUF) | 4 B | Qwen3.5-4B | Q4_K_M | Apache 2.0 | 01–04, forward test |
+| [`kev-9b`](https://huggingface.co/ggml-org/Kev-9B-GGUF) | 9 B | Qwen3.5-9B-Base | Q4_K_M | Apache 2.0 | 01–04, forward test |
+| [`bespoke-nimble-9b-v3`](https://huggingface.co/ggml-org/Bespoke-Nimble-9B-v3-GGUF) | 9 B | Qwen3.5-9B | Q4_K_M | CC BY-NC 4.0 | 01 |
+| [`cloudflare_clef-flash`](https://huggingface.co/bartowski/Cloudflare_clef-flash-GGUF) | 9 B | Qwen3.5-9B | Q4_K_M | Apache 2.0 | 01 |
+| [`openjev`](https://huggingface.co/ggml-org/OpenJev-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | CC BY-NC 4.0 | 01, 02 |
+| [`clef`](https://huggingface.co/ggml-org/Clef-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | Apache 2.0 | 01–04, forward test |
+| [TimesFM 3.0](https://huggingface.co/google/timesfm-3.0-pytorch) | 0.3 B | time-series foundation model (Google) | F32 | TimesFM Non-Commercial 1.0 | 01–04, forward test |
+| [TimesFM 2.5](https://huggingface.co/google/timesfm-2.5-200m-pytorch) | 0.2 B | time-series foundation model (Google), previous generation | F32 | Apache 2.0 | 01, 02 |
+
+Every model runs locally; decision models as quantised GGUF builds. Decision models do not generate text: given a state and typed questions, each returns probabilities over the answer options in a single forward pass. Sources: the linked model cards and the llama.cpp [decision-models overview](https://huggingface.co/blog/ggml-org/decision-models-in-llamacpp). Three licences are non-commercial (bespoke-nimble-9b-v3, openjev and TimesFM 3.0): fine for research, but trading with them needs the owner's permission.
+
 ## Findings so far
 
 | Notebook | Question | Answer |
@@ -42,28 +64,6 @@ In more detail:
 ![News and search interest at a 1-day horizon](docs/figures/03_news_search_h1.png)
 
 ![Headline readers' information coefficients](docs/figures/04_reader_ic.png)
-
-## Models
-
-All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. The forward test uses clef, lev and kev-9b, frozen by file hash.
-
-| Model | Params | Base model | Build | Licence | Used in |
-|---|---|---|---|---|---|
-| [`julia-1`](https://huggingface.co/ggml-org/Julia-1-GGUF) | 0.1 B | mmBERT-small (ModernBERT family) | Q8_0 | Apache 2.0 | 01 |
-| [`laya`](https://huggingface.co/ggml-org/Laya-GGUF) | 0.4 B | ModernBERT-large | Q8_0 | Apache 2.0 | 01, 03 |
-| [`d1-omni-600m`](https://huggingface.co/LiquidAI/d1-omni-600M-GGUF) | 0.6 B | LFM2.5-Encoder-350M (Liquid AI) | Q8_0 | LFM Open License 1.0 | 01 |
-| [`d1-3b`](https://huggingface.co/LiquidAI/d1-3B-GGUF) | 3 B | LFM2.5-VL-3B (Liquid AI) | Q4_K_M | LFM Open License 1.0 | 01 |
-| [`kev-4b`](https://huggingface.co/ggml-org/Kev-4B-GGUF) | 4 B | Qwen3.5-4B-Base | Q4_K_M | Apache 2.0 | 01 |
-| [`lev`](https://huggingface.co/ggml-org/lev-GGUF) | 4 B | Qwen3.5-4B | Q4_K_M | Apache 2.0 | 01–04, forward test |
-| [`kev-9b`](https://huggingface.co/ggml-org/Kev-9B-GGUF) | 9 B | Qwen3.5-9B-Base | Q4_K_M | Apache 2.0 | 01–04, forward test |
-| [`bespoke-nimble-9b-v3`](https://huggingface.co/ggml-org/Bespoke-Nimble-9B-v3-GGUF) | 9 B | Qwen3.5-9B | Q4_K_M | CC BY-NC 4.0 | 01 |
-| [`cloudflare_clef-flash`](https://huggingface.co/bartowski/Cloudflare_clef-flash-GGUF) | 9 B | Qwen3.5-9B | Q4_K_M | Apache 2.0 | 01 |
-| [`openjev`](https://huggingface.co/ggml-org/OpenJev-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | CC BY-NC 4.0 | 01, 02 |
-| [`clef`](https://huggingface.co/ggml-org/Clef-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | Apache 2.0 | 01–04, forward test |
-| [TimesFM 3.0](https://huggingface.co/google/timesfm-3.0-pytorch) | 0.3 B | time-series foundation model (Google) | F32 | TimesFM Non-Commercial 1.0 | 01–04, forward test |
-| [TimesFM 2.5](https://huggingface.co/google/timesfm-2.5-200m-pytorch) | 0.2 B | time-series foundation model (Google), previous generation | F32 | Apache 2.0 | 01, 02 |
-
-Every model runs locally; decision models as quantised GGUF builds. Decision models do not generate text: given a state and typed questions, each returns probabilities over the answer options in a single forward pass. Sources: the linked model cards and the llama.cpp [decision-models overview](https://huggingface.co/blog/ggml-org/decision-models-in-llamacpp). Three licences are non-commercial (bespoke-nimble-9b-v3, openjev and TimesFM 3.0): fine for research, but trading with them needs the owner's permission.
 
 ## Approach
 
