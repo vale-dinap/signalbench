@@ -264,9 +264,20 @@ def fetch_polymarket_closed_events(start, end, n: int = 200, page: int = 100) ->
     return events[:n]
 
 
-def load_polymarket_history(token_id: str, fidelity: int = 1440, interval: str = "all") -> pd.DataFrame:
-    """Yes-token price history. fidelity is in minutes (1440 = daily)."""
-    params = {"market": token_id, "interval": interval, "fidelity": fidelity}
+def load_polymarket_history(token_id: str, fidelity: int = 1440, interval: str = "all", start=None,
+                            end=None) -> pd.DataFrame:
+    """Yes-token price history. fidelity is in minutes (1440 = daily).
+
+    Daily history over the whole life of a market can skip days; start and end
+    (UTC, replacing interval) fetch a window of up to about two weeks, where
+    hourly fidelity is available.
+    """
+    params = {"market": token_id, "fidelity": fidelity}
+    if start is None and end is None:
+        params["interval"] = interval
+    else:
+        params["startTs"] = int(_utc_naive(start).tz_localize("UTC").timestamp())
+        params["endTs"] = int(_utc_naive(end).tz_localize("UTC").timestamp())
     r = requests.get(POLYMARKET_HISTORY_URL, params=params, timeout=30)
     r.raise_for_status()
     hist = pd.DataFrame(r.json().get("history", []))

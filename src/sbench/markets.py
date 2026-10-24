@@ -7,11 +7,14 @@ price at that time (see docs/forward_test_plan.md). Markets are chosen per event
 - binary Yes/No markets that resolved (one outcome priced at 1),
 - still open at the forecast time: a market that closed earlier would ask about a
   known result,
-- at least `min_history` daily prices at or before the forecast time,
+- at least `min_history` daily prices at or before the forecast time, the last of
+  them no more than `fresh` before it, so that the market's price is current,
 - of these, the highest-volume market, so that each event counts once.
 
-A question's series holds only prices at or before the forecast time, so no
-state builder can show what followed.
+Daily history over a market's whole life can skip days, so the week before the
+forecast time is filled in from hourly prices; each day keeps its last price. A
+question's series holds only prices at or before the forecast time, so no state
+builder can show what followed.
 """
 from __future__ import annotations
 
@@ -29,6 +32,8 @@ from .forecast import ForecastTask, horizon_scale
 
 LEAD = pd.Timedelta(days=7)
 MIN_HISTORY = 30
+RECENT = pd.Timedelta(days=7)    # window fetched at hourly resolution before the forecast time
+FRESH = pd.Timedelta(days=1)     # the last price must be at most this old at the forecast time
 MARKET = "market"   # the reference predictor: the market's own price as P(Yes)
 
 
@@ -73,16 +78,18 @@ class MarketQuestion:
         current price)) fail instead of being read as P(Yes).
         """
         idx = len(self.series) - 1
-        horizon = max(1, math.ceil((self.end - self.series.df["t"].iloc[idx]) / pd.Timedelta(days=1)))
+        horizon = max(1, math.ceil((self.end - self.asked_at) / pd.Timedelta(days=1)))
         return ForecastTask(self.series, idx, horizon, np.array([0.5]), np.array([np.nan]),
                             horizon_scale(self.series, idx, horizon))
 
 
-def select_markets(events: Iterable[dict], history: Callable[[str], pd.DataFrame], lead: pd.Timedelta = LEAD,
-                   min_history: int = MIN_HISTORY) -> list[MarketQuestion]:
+def select_markets(events: Iterable[dict], history: Callable[[str], pd.DataFrame],
+                   recent: Callable[[str, pd.Timestamp, pd.Timestamp], pd.DataFrame], lead: pd.Timedelta = LEAD,
+                   min_history: int = MIN_HISTORY, fresh: pd.Timedelta = FRESH) -> list[MarketQuestion]:
     """One MarketQuestion per event that has an eligible market (see the module docstring).
 
-    history(yes_token_id) returns the market's (t, close) price history.
+    history(yes_token_id) returns the market's daily (t, close) history;
+    recent(yes_token_id, start, end) its hourly history between two times.
     """
     out = []
     for event in events:
@@ -98,15 +105,19 @@ def select_markets(events: Iterable[dict], history: Callable[[str], pd.DataFrame
         for volume, end, outcome, m in sorted(candidates, key=lambda c: -c[0]):
             outcomes = json.loads(m["outcomes"])
             token = json.loads(m["clobTokenIds"])[outcomes.index("Yes")]
-            df = daily_last(history(token))
-            known = df[df["t"] <= end - lead]
-            if len(known) < min_history:
+            asked = end - lead
+            daily = history(token)
+            if len(daily_last(daily[daily["t"] <= asked])) + RECENT.days < min_history:
+                continue   # too short even if the last week fills in; spares the hourly fetch
+            known = daily_last(pd.concat([daily, recent(token, asked - RECENT, asked)]))
+            known = known[known["t"] <= asked].reset_index(drop=True)
+            if len(known) < min_history or asked - known["t"].iloc[-1] > fresh:
                 continue
             description = (f"Prediction market: {m['question']}\n"
                            f"Resolves on {end:%Y-%m-%d}: the Yes price goes to 1 if the answer is Yes, to 0 if No.")
             series = Series(m["slug"], description, known, kind="probability", value_label="Yes price",
                             meta={"source": "polymarket", "event": event.get("title"), "yes_token_id": token})
-            out.append(MarketQuestion(m["slug"], event.get("title", ""), m["question"], volume, end, end - lead,
+            out.append(MarketQuestion(m["slug"], event.get("title", ""), m["question"], volume, end, asked,
                                       outcome, series))
             break
     return out

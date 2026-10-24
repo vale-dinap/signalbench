@@ -31,19 +31,27 @@ EVENTS = [
         market("three-way", 3000, outcomes=("A", "B")),
     ]},
     {"title": "Settled early", "markets": [market("only-early", 800, closed="2026-11-01 00:00:00+00")]},
-    {"title": "Weather", "markets": [market("rain", 50, yes_price="0")]},
+    {"title": "Weather", "markets": [market("stale", 60), market("rain", 50, yes_price="0")]},
 ]
 
 
 def history(token):
-    days = 20 if token.startswith("short-history") else 90
-    t = pd.date_range(end="2026-12-01", periods=days, freq="D")
-    return pd.DataFrame({"t": t, "close": np.linspace(0.3, 0.1, days)})
+    """Daily prices with every other day missing (as the API's daily history can be); 'stale' stops trading early."""
+    days = 20 if token.startswith("short-history") else 180
+    t = pd.date_range(end="2026-11-10" if token.startswith("stale") else "2026-12-01", periods=days, freq="D")[::2]
+    return pd.DataFrame({"t": t, "close": np.linspace(0.3, 0.1, len(t))})
+
+
+def recent(token, start, end):
+    if token.startswith("stale"):
+        return pd.DataFrame(columns=["t", "close"])
+    t = pd.date_range(start, end, freq="h")
+    return pd.DataFrame({"t": t, "close": 0.15})
 
 
 @pytest.fixture
 def questions():
-    return markets.select_markets(EVENTS, history)
+    return markets.select_markets(EVENTS, history, recent)
 
 
 def test_one_open_resolved_market_with_enough_history_per_event(questions):
@@ -51,12 +59,14 @@ def test_one_open_resolved_market_with_enough_history_per_event(questions):
     q = questions[0]
     assert q.outcome == 0 and q.event == "Election" and q.asked_at == pd.Timestamp("2026-11-24 12:00")
     assert q.series.df["t"].max() <= q.asked_at and len(q.series) >= markets.MIN_HISTORY
-    assert q.price == q.series.df["close"].iloc[-1]
+    assert q.price == q.series.df["close"].iloc[-1] == 0.15
+    assert q.series.df["t"].iloc[-1] == q.asked_at                   # the price at the forecast time, from hourly data
+    assert (q.series.df["t"].diff().iloc[-7:-1] == pd.Timedelta(days=1)).all()   # no gaps in the last week
 
 
 def test_the_task_asks_about_0_50_and_shows_nothing_after_the_forecast_time(questions):
     task = questions[0].task()
-    assert task.thresholds.tolist() == [0.5] and task.horizon == 8
+    assert task.thresholds.tolist() == [0.5] and task.horizon == 7
     assert "0.500" in json.dumps(ThresholdNoul().questions(task))
     state = build_price_state(task)
     assert "Resolves on 2026-12-01" in state and "2026-11-25" not in state
