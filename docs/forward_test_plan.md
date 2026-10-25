@@ -11,7 +11,7 @@ No daily collection is needed: every source keeps an archive (Binance and ECB hi
 ## Period and timing
 
 - **Forward period:** 1 November 2026 to 30 April 2027. It starts after the plan and after the latest model file, not on 1 October: a model file published in mid-October could in principle have been trained on early-October data.
-- **Evaluation:** once all outcomes in the period are known (early May 2027), in a new notebook `05_forward_test`.
+- **Evaluation:** once all outcomes in the period are known (early May 2027), in the notebook `05_forward_test`, which is committed before the period without being run, so the analysis is fixed as well as the hypotheses.
 - **Update:** the same analysis repeated over 1 November 2026 to 31 October 2027 for the hypotheses flagged as low-power below. The first evaluation is reported regardless of the update.
 
 ## What is frozen
@@ -26,7 +26,7 @@ No daily collection is needed: every source keeps an archive (Binance and ECB hi
 
 **TimesFM:** `google/timesfm-3.0-pytorch` at Hugging Face revision `43046b85ec22d584a13f8098c2ed39c889e129c2`, run with the `timesfm` package 3.0.2.
 
-**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), headline readers (`sbench.headlines`), prediction-market questions (`sbench.markets`), state builders (`sbench.states`, `sbench.context`) and predictors as of the last commit that amends this plan before the forward period (since the original plan, the modules frozen then only gained additions: `rank_ic`, `sbench.headlines` and `sbench.markets`). Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
+**Code:** the scoring (`sbench.scoring`), forecast tasks and grids (`sbench.forecast`), elicitation formats (`sbench.elicitation`), headline readers (`sbench.headlines`), prediction-market questions (`sbench.markets`), hypothesis verdicts (`sbench.hypotheses`), state builders (`sbench.states`, `sbench.context`) and predictors as of the last commit that amends this plan before the forward period (since the original plan, the modules frozen then only gained additions: `rank_ic`, `sbench.headlines`, `sbench.markets` and `sbench.hypotheses`). Data loaders may be extended to fetch the new period; any other change is a deviation (see below).
 
 **Configuration,** as in 03: the same eight instruments (BTC, ETH from Binance; SPY, AAPL, GLD, USO from Yahoo; EUR/USD and USD/JPY from ECB reference rates), the same close times, the threshold grid at ±0.5 to ±2 recent standard deviations, 60 closes in the decision models' state, the same related series, news parameters (24 hours, 15 instrument headlines, 5 macro headlines, 30-day baseline) and search terms. Decision models use the named state.
 
