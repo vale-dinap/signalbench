@@ -1,4 +1,4 @@
-"""Time-series foundation models (e.g. Google TimesFM 3.0) as predictors.
+"""Time-series foundation models (Google TimesFM, Mistral Timestral) as predictors.
 
 A QuantileForecaster takes a numeric context and returns quantiles of the value
 at the forecast horizon. QuantilePredictor feeds it the task's history and maps
@@ -6,7 +6,8 @@ the quantiles onto the task's threshold grid, so these models are scored exactly
 like decision models.
 
 Backends: TimesFM3 (main, with related series as covariates), TimesFM25
-(previous generation, univariate), GaussianForecaster (reference for tests).
+(previous generation, univariate), Timestral (released after the study, with
+covariates), GaussianForecaster (reference for tests).
 They import their libraries lazily, so the package works without them.
 """
 from __future__ import annotations
@@ -220,6 +221,54 @@ class TimesFM25:
 
     def describe(self) -> dict:
         return {**describe_dataclass(self), "timesfm": _version("timesfm")}
+
+
+TIMESTRAL_LEVELS = np.round(np.r_[0.01, np.arange(1, 20) / 20, 0.99], 2)   # 21 levels
+
+
+@dataclass
+class Timestral:
+    """Mistral Timestral 1.0 (pip install "signalbench[timestral]"), released 15 Oct 2026.
+
+    Related series are passed as past-only covariates, one row per series; NaN
+    marks missing values, which the model masks. Non-negative clipping is off:
+    contexts may be log prices.
+
+    checkpoint : Hugging Face repo id (5M, 28M, 123M or 209M) or local checkpoint
+    revision   : Hugging Face commit, so a rerun uses the same weights
+    device     : "cuda" / "cpu"; None picks cuda when available. Not part of
+                 describe(), so a run can resume on other hardware
+    """
+    checkpoint: str = "mistralai/Timestral-209M"
+    revision: str | None = "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
+    device: str | None = None
+
+    def __post_init__(self):
+        self.levels = TIMESTRAL_LEVELS
+
+    def _model(self):
+        def load():
+            import torch
+            from timestral import TimestralForecaster
+            device = self.device or ("cuda" if torch.cuda.is_available() else "cpu")
+            return TimestralForecaster.from_pretrained(self.checkpoint, device=device, revision=self.revision)
+        return _load(("timestral", self.checkpoint, self.revision, self.device), load)
+
+    def forecast(self, context, horizon, covariates=None):
+        cov = [c for c in (covariates or {}).values() if not np.isnan(c).all()]
+        out = self._model().forecast(np.asarray(context, dtype=float)[None, None, :], prediction_length=horizon,
+                                     past_covariates=np.vstack(cov)[None] if cov else None,
+                                     clip_nonnegative=False)
+        if not np.allclose(np.asarray(out.quantile_levels, dtype=float), self.levels):
+            raise ValueError(f"{self.checkpoint} predicts quantiles {out.quantile_levels}, expected {self.levels}")
+        q = out.quantiles
+        q = q.cpu().numpy() if hasattr(q, "cpu") else np.asarray(q)
+        return q.reshape(-1, horizon, len(self.levels))[0, horizon - 1]   # (1, 1, H, 21) -> level row at H
+
+    def describe(self) -> dict:
+        d = describe_dataclass(self)
+        d.pop("device")
+        return {**d, "timestral": _version("timestral")}
 
 
 def _normal_ppf(p) -> np.ndarray:

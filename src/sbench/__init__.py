@@ -13,7 +13,7 @@ states      : natural-language state builders and wording
 headlines   : decision models as headline readers; news score and intensity
 forecast    : ForecastTask, threshold grids, monotone CDFs, quantile mapping, CRPS
 predictors  : common predictor interface; decision models and baselines
-tsfm        : time-series foundation models (TimesFM) via quantile forecasts
+tsfm        : time-series foundation models (TimesFM, Timestral) via quantile forecasts
 backtest    : resumable forecast backtests (long-format CSV + run metadata + raw audit trail)
 combine     : linear pools and agreement gates over stored forecasts
 markets     : prediction markets as questions: will a market resolve Yes? Selection, runner, scoring

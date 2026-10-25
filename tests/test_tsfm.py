@@ -4,7 +4,7 @@ import pytest
 from sbench import tsfm
 from sbench.data import Series
 from sbench.forecast import make_task
-from sbench.tsfm import QuantilePredictor, TimesFM3, TimesFM25
+from sbench.tsfm import QuantilePredictor, TimesFM3, TimesFM25, Timestral
 
 
 class StubTimesFM3:
@@ -53,6 +53,47 @@ def test_timesfm3_describe_omits_device():
     assert "device" not in d and d["type"] == "TimesFM3" and "timesfm" in d
 
 
+class StubTimestral:
+    """Records forecast() calls; returns (1, 1, H, 21) quantiles growing with the horizon step."""
+
+    def __init__(self):
+        self.calls = []
+
+    def forecast(self, context, prediction_length, past_covariates=None, clip_nonnegative=True):
+        self.calls.append({"context": context, "cov": past_covariates, "clip": clip_nonnegative})
+        steps = np.arange(1, prediction_length + 1)[:, None]
+        q = context[0, 0, -1] + steps * np.linspace(-1, 1, 21)[None, :]
+        return type("Out", (), {"quantiles": q[None, None], "quantile_levels": tsfm.TIMESTRAL_LEVELS})()
+
+
+@pytest.fixture
+def stub_timestral(monkeypatch):
+    s = StubTimestral()
+    monkeypatch.setitem(tsfm._MODELS, ("timestral", "stub", None, None), s)
+    return s
+
+
+def test_timestral_returns_quantiles_at_the_horizon(stub_timestral):
+    q = Timestral("stub", revision=None).forecast(np.array([1.0, 2.0, 3.0]), horizon=4)
+    np.testing.assert_allclose(q, 3.0 + 4 * np.linspace(-1, 1, 21))
+    call = stub_timestral.calls[0]
+    assert call["context"].shape == (1, 1, 3) and call["cov"] is None and call["clip"] is False
+
+
+def test_timestral_stacks_covariates_and_drops_empty_ones(stub_timestral, gbm):
+    late = Series("late", "Starts after the context", gbm.df.iloc[200:])
+    other = Series("other", "Other", gbm.df.assign(close=gbm.df["close"] * 2))
+    task = make_task(gbm, 150, 1, related=(other, late))
+    QuantilePredictor(Timestral("stub", revision=None), max_context=64, log_space=True,
+                      use_related=True).predict(task)
+    assert stub_timestral.calls[0]["cov"].shape == (1, 1, 64)   # (batch, covariates, time)
+
+
+def test_timestral_describe_pins_the_revision():
+    d = Timestral(device="cpu").describe()
+    assert "device" not in d and d["revision"] and "timestral" in d
+
+
 def test_timesfm25_rejects_covariates():
     with pytest.raises(ValueError, match="covariates"):
         TimesFM25().forecast(np.ones(10), 1, {"x": np.ones(10)})
@@ -60,9 +101,9 @@ def test_timesfm25_rejects_covariates():
 
 # ── Real models (skipped unless timesfm is installed; first run downloads weights) ──
 
-@pytest.mark.parametrize("backend", ["TimesFM3", "TimesFM25"])
+@pytest.mark.parametrize("backend", ["TimesFM3", "TimesFM25", "Timestral"])
 def test_real_model_gives_coherent_forecast(backend, gbm):
-    pytest.importorskip("timesfm3" if backend == "TimesFM3" else "timesfm")
+    pytest.importorskip({"TimesFM3": "timesfm3", "TimesFM25": "timesfm", "Timestral": "timestral"}[backend])
     task = make_task(gbm, 250, 3)
     p = QuantilePredictor(getattr(tsfm, backend)(), log_space=True).predict(task).p_above
     assert p.shape == task.thresholds.shape
