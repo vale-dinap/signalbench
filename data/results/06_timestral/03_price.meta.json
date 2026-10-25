@@ -1,0 +1,266 @@
+{
+  "BTC|h=5": {
+    "n_rows": 1369,
+    "fingerprint": "f6b57e6878afa571",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "ETH|h=5": {
+    "n_rows": 1369,
+    "fingerprint": "d031f226fe0acf21",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "SPY|h=5": {
+    "n_rows": 939,
+    "fingerprint": "73d6f106c556607f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "AAPL|h=5": {
+    "n_rows": 939,
+    "fingerprint": "3c98375d16f4f34d",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "GLD|h=5": {
+    "n_rows": 939,
+    "fingerprint": "59885d8cdcc3394f",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "USO|h=5": {
+    "n_rows": 939,
+    "fingerprint": "5416828560733c34",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "EURUSD|h=5": {
+    "n_rows": 957,
+    "fingerprint": "0917a303738d9749",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  },
+  "USDJPY|h=5": {
+    "n_rows": 957,
+    "fingerprint": "cebed04ef4b5be0e",
+    "sigmas": [
+      -2.0,
+      -1.5,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "vol_window": 30,
+    "related": [],
+    "kind": "price",
+    "predictors": {
+      "timestral": {
+        "type": "QuantilePredictor",
+        "forecaster": {
+          "type": "Timestral",
+          "checkpoint": "mistralai/Timestral-209M",
+          "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+          "timestral": "1.0.0"
+        },
+        "name": "timestral",
+        "max_context": 1024,
+        "log_space": true,
+        "use_related": false
+      }
+    }
+  }
+}
