@@ -4,15 +4,16 @@
 
 Benchmarking AI models as trading-signal sources: decision models, time-series foundation models and their combinations, scored on calibrated forecasts.
 
-> Research in progress: notebooks 01 to 04 are complete; a forward test on live data is next.
+> Research in progress: notebooks 01 to 04 are complete, with an addendum (06) on a model released since; a forward test on live data is next.
 
 ## Bottom line
 
-Language models and time-series foundation models are increasingly proposed as sources of trading signals. This project tests whether they are, with three safeguards that such claims often skip: each model sees only information available at the time of the forecast, results are compared before and after the models were released (outcomes after the release cannot have been memorised), and every model is scored against a random walk with confidence intervals.
+Language models and time-series foundation models are increasingly proposed as sources of trading signals. This project tests whether they are, with three safeguards that such claims often skip: each model sees only information available at the time of the forecast, results are compared before and after a model's release where it falls inside the test period (outcomes after the release cannot have been memorised), and every model is scored against a random walk with confidence intervals.
 
 **At daily horizons (1 and 5 days) on eight liquid instruments, none of the models tested provides a usable signal of where prices go next.**
 
 - **TimesFM 3.0** forecasts calibrated distributions that tie the random walk (CRPS skill −0.009, interval −0.022 to +0.004). That makes it usable as a risk input, such as interval or position sizing, but not as a source of returns.
+- **Timestral** (Mistral, released after these tests were run) beats TimesFM 3.0 on every real-asset test and edges the random walk (CRPS skill +0.007, +0.001 to +0.014), through better-sized intervals rather than direction: its Brier skill on P(up) is −0.005 (−0.016 to +0.005). Those results are in-sample for it, so recall cannot be ruled out (06).
 - **The decision models tested** are worse than the random walk as forecasters, and headlines make them worse. Combined with TimesFM they add nothing measurable (+0.003, −0.007 to +0.013).
 - **As headline readers** the decision models do understand the news: their ratings track the move just made. But their news score has no information coefficient with the next return (−0.005, −0.075 to +0.064). Studies that find LLM sentiment predicting next-day returns (Lopez-Lira and Tang, 2023) locate the effect in small stocks and in news released after the close; with liquid instruments and news known before the decision time, none remains.
 
@@ -20,7 +21,7 @@ These results do not cover less-covered assets, intraday horizons, news timed to
 
 ## Models
 
-All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. The forward test uses clef, lev and kev-9b, frozen by file hash.
+All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. TimesFM 3.0 is the foundation model throughout, with 2.5 as the previous-generation reference; Timestral, released after the test period, is scored on the same tests in an addendum (06). The forward test uses clef, lev, kev-9b and TimesFM 3.0, frozen by file hash and revision.
 
 | Model | Params | Base model | Build | Licence | Used in |
 |---|---|---|---|---|---|
@@ -37,8 +38,9 @@ All eleven decision models were screened on synthetic data (01); the best format
 | [`clef`](https://huggingface.co/ggml-org/Clef-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | Apache 2.0 | 01–04, forward test |
 | [TimesFM 3.0](https://huggingface.co/google/timesfm-3.0-pytorch) | 0.3 B | time-series foundation model (Google) | F32 | TimesFM Non-Commercial 1.0 | 01–04, forward test |
 | [TimesFM 2.5](https://huggingface.co/google/timesfm-2.5-200m-pytorch) | 0.2 B | time-series foundation model (Google), previous generation | F32 | Apache 2.0 | 01, 02 |
+| [Timestral](https://huggingface.co/mistralai/Timestral-209M) | 0.2 B | time-series foundation model (Mistral), released 15 October 2026 | F32 | Modified MIT | 06 (addendum; released after the test period) |
 
-Every model runs locally; decision models as quantised GGUF builds. Decision models do not generate text: given a state and typed questions, each returns probabilities over the answer options in a single forward pass. Sources: the linked model cards and the llama.cpp [decision-models overview](https://huggingface.co/blog/ggml-org/decision-models-in-llamacpp). Three licences are non-commercial (bespoke-nimble-9b-v3, openjev and TimesFM 3.0): fine for research, but trading with them needs the owner's permission.
+Every model runs locally; decision models as quantised GGUF builds. Decision models do not generate text: given a state and typed questions, each returns probabilities over the answer options in a single forward pass. Sources: the linked model cards and the llama.cpp [decision-models overview](https://huggingface.co/blog/ggml-org/decision-models-in-llamacpp). Three licences are non-commercial (bespoke-nimble-9b-v3, openjev and TimesFM 3.0): fine for research, but trading with them needs the owner's permission. Timestral's allows commercial use for companies below $20 M of monthly revenue.
 
 ## Findings so far
 
@@ -48,6 +50,7 @@ Every model runs locally; decision models as quantised GGUF builds. Decision mod
 | [02 · Real assets](notebooks/02_real_assets.ipynb) | Does any of it carry over to real prices? | No predictor beats the random walk at a 5-day horizon on eight liquid instruments, 2024–2026. TimesFM ties it (−0.009, interval −0.022 to +0.004) and is well calibrated; every decision model is worse. |
 | [03 · Enrichment](notebooks/03_enrichment.ipynb) | Does added information create skill? | No. Related assets, technical indicators, news and search interest leave TimesFM unchanged. Decision models gain from summaries (indicators, search ratios) by losing a bearish lean, and lose from raw headlines, which make them more confident without making them more right. |
 | [04 · Combinations](notebooks/04_combinations.ipynb) | Can decision models add to TimesFM? | No. Pools and agreement gates with TimesFM stay within ±0.01 of it. As headline readers they rate news sensibly (their ratings track the move already made), but their news score has no information coefficient with the next return (−0.005, interval −0.075 to +0.064). |
+| [06 · Timestral](notebooks/06_timestral.ipynb) | Does a newer foundation model, released after these tests, change the answer? | Not for direction. Timestral beats TimesFM 3.0 on all eight real-asset tests (CRPS +0.008 to +0.019) and is the first predictor here to edge the random walk (+0.007, +0.001 to +0.014), but through its intervals, not its direction, and in-sample for it. |
 
 In more detail:
 
@@ -58,6 +61,7 @@ In more detail:
 - **News hurts decision models as forecasters.** At a 1-day horizon, headlines widen lev's P(up) from a standard deviation of 0.069 to 0.168 and cost it 0.132 in Brier skill against its own price-only answers, while its hit rate stays below 50%. Headlines describe moves already in the price at the decision time (03).
 - **Diversity without skill does not combine into skill.** TimesFM's P(up) correlates at most 0.14 with any decision model's, yet the best pool, with its weight fitted out of sample, gains only +0.003 in CRPS skill over TimesFM (−0.007 to +0.013) (04).
 - **Read as sentiment, news is already priced.** Asked only how good or bad each headline is, the models' ratings follow the size of the past move (IC up to +0.26) but not the direction of the next one; their link to the next move's size is mostly cross-asset volatility (04).
+- **A better foundation model forecasts risk, not direction.** Timestral's edge over the random walk comes from interval width: its 80% band ranks the size of the coming move better (rank correlation 0.149 within instrument, against 0.116). Its edge over TimesFM 3.0 comes from the centre: its median stays near the last close (0.13% away, against 0.43%), so it loses less on directional bets. On synthetic series, where recall is impossible, its lead over TimesFM 3.0 is not significant (06).
 
 ![CRPS skill on real prices](docs/figures/02_real_assets_crps_skill.png)
 
@@ -65,12 +69,14 @@ In more detail:
 
 ![Headline readers' information coefficients](docs/figures/04_reader_ic.png)
 
+![Timestral against TimesFM 3.0](docs/figures/06_timestral_vs_timesfm3.png)
+
 ## Approach
 
 Every model is reduced to the same output: the probability that an instrument's value at a given horizon will be above each of a grid of thresholds around the current value. That makes very different models directly comparable:
 
 - **Decision models** (Jev-style "System One" models served via llama.cpp `/v1/systemone`) answer yes/no probability questions, asked in one of several elicitation formats.
-- **Time-series foundation models** (Google TimesFM 3.0, and 2.5 as a reference) produce quantile forecasts, which are mapped onto the same thresholds; related series, news and search interest enter as past-only covariates.
+- **Time-series foundation models** (Google TimesFM 3.0, 2.5 as a reference, and Mistral Timestral in 06) produce quantile forecasts, which are mapped onto the same thresholds; related series, news and search interest enter as past-only covariates.
 - **Baselines** (random walk, empirical distribution of past changes) set the bar to beat.
 
 Forecasts are scored with normalised CRPS, Brier score on P(up), interval coverage and answer coherence, always relative to the random walk on the same decision points, with paired bootstrap confidence intervals.
@@ -117,6 +123,7 @@ TimesFM (3.0, plus 2.5 as the previous-generation reference) is optional. Instal
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cu130   # GPU; skip for CPU-only
 pip install -e ".[tsfm]"
+pip install -e ".[timestral]"    # Mistral Timestral, for 06; installed from GitHub, CPU or GPU
 ```
 
 Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed to rebuild snapshots.
