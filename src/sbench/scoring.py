@@ -129,9 +129,10 @@ def skill_table(per: pd.DataFrame, metric: str = "crps_n", baseline: str = "rand
     One row per (*by, predictor) with columns skill, lo, hi, N. Pairs are matched
     on (series, t), so by=("horizon",) pools series; decision points are resampled
     as pairs, so the interval reflects the comparison rather than each score alone.
+    Each comparison draws from its own generator over its pairs in index order, so
+    an interval does not depend on the other predictors in `per` or on row order.
     """
     by = list(by)
-    rng = np.random.default_rng(seed)
     out = []
     for keys, g in per.groupby(by):
         keys = keys if isinstance(keys, tuple) else (keys,)
@@ -139,11 +140,11 @@ def skill_table(per: pd.DataFrame, metric: str = "crps_n", baseline: str = "rand
         for pred, m in g.groupby("predictor", sort=False):
             if pred == baseline or metric not in m:
                 continue
-            pair = pd.concat([m.set_index(["series", "t"])[metric], base], axis=1, join="inner").dropna()
+            pair = pd.concat([m.set_index(["series", "t"])[metric], base], axis=1, join="inner").dropna().sort_index()
             if len(pair) < 2:
                 continue
             x, b = pair.iloc[:, 0].to_numpy(), pair.iloc[:, 1].to_numpy()
-            idx = rng.integers(0, len(x), (n, len(x)))
+            idx = np.random.default_rng(seed).integers(0, len(x), (n, len(x)))
             boot = 1 - x[idx].mean(axis=1) / b[idx].mean(axis=1)
             lo, hi = np.quantile(boot, [alpha / 2, 1 - alpha / 2])
             out.append({**dict(zip(by, keys)), "predictor": pred, "skill": 1 - x.mean() / b.mean(),
