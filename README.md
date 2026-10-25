@@ -13,7 +13,7 @@ Language models and time-series foundation models are increasingly proposed as s
 **At daily horizons (1 and 5 days) on eight liquid instruments, none of the models tested provides a usable signal of where prices go next.**
 
 - **TimesFM 3.0** forecasts calibrated distributions that tie the random walk (CRPS skill −0.009, interval −0.022 to +0.004). That makes it usable as a risk input, such as interval or position sizing, but not as a source of returns.
-- **Timestral** (Mistral, released after these tests were run) beats TimesFM 3.0 on every real-asset test and edges the random walk (CRPS skill +0.007, +0.001 to +0.014), through better-sized intervals rather than direction: its Brier skill on P(up) is −0.005 (−0.016 to +0.005). Those results are in-sample for it, so recall cannot be ruled out (06).
+- **Timestral** (Mistral, released after these tests were run) beats TimesFM 3.0 on every real-asset test and edges the random walk (CRPS skill +0.007, +0.001 to +0.014), through better-sized intervals rather than direction: its Brier skill on P(up) is −0.005 (−0.016 to +0.005). Those results are in-sample for it, so recall cannot be ruled out (06); the forward test checks both claims.
 - **The decision models tested** are worse than the random walk as forecasters, and headlines make them worse. Combined with TimesFM they add nothing measurable (+0.003, −0.007 to +0.013).
 - **As headline readers** the decision models do understand the news: their ratings track the move just made. But their news score has no information coefficient with the next return (−0.005, −0.075 to +0.064). Studies that find LLM sentiment predicting next-day returns (Lopez-Lira and Tang, 2023) locate the effect in small stocks and in news released after the close; with liquid instruments and news known before the decision time, none remains.
 
@@ -21,7 +21,7 @@ These results do not cover less-covered assets, intraday horizons, news timed to
 
 ## Models
 
-All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. TimesFM 3.0 is the foundation model throughout, with 2.5 as the previous-generation reference; Timestral, released after the test period, is scored on the same tests in an addendum (06). The forward test uses clef, lev, kev-9b and TimesFM 3.0, frozen by file hash and revision.
+All eleven decision models were screened on synthetic data (01); the best format of the strongest few went on to real prices. TimesFM 3.0 is the foundation model throughout, with 2.5 as the previous-generation reference; Timestral, released after the test period, is scored on the same tests in an addendum (06). The forward test uses clef, lev, kev-9b, TimesFM 3.0 and Timestral, frozen by file hash and revision.
 
 | Model | Params | Base model | Build | Licence | Used in |
 |---|---|---|---|---|---|
@@ -38,7 +38,7 @@ All eleven decision models were screened on synthetic data (01); the best format
 | [`clef`](https://huggingface.co/ggml-org/Clef-GGUF) | 27 B | Qwen3.8-27B | Q4_K_M | Apache 2.0 | 01–04, forward test |
 | [TimesFM 3.0](https://huggingface.co/google/timesfm-3.0-pytorch) | 0.3 B | time-series foundation model (Google) | F32 | TimesFM Non-Commercial 1.0 | 01–04, forward test |
 | [TimesFM 2.5](https://huggingface.co/google/timesfm-2.5-200m-pytorch) | 0.2 B | time-series foundation model (Google), previous generation | F32 | Apache 2.0 | 01, 02 |
-| [Timestral](https://huggingface.co/mistralai/Timestral-209M) | 0.2 B | time-series foundation model (Mistral), released 15 October 2026 | F32 | Modified MIT | 06 (addendum; released after the test period) |
+| [Timestral](https://huggingface.co/mistralai/Timestral-209M) | 0.2 B | time-series foundation model (Mistral), released 15 October 2026 | F32 | Modified MIT | 06 (addendum; released after the test period), forward test |
 
 Every model runs locally; decision models as quantised GGUF builds. Decision models do not generate text: given a state and typed questions, each returns probabilities over the answer options in a single forward pass. Sources: the linked model cards and the llama.cpp [decision-models overview](https://huggingface.co/blog/ggml-org/decision-models-in-llamacpp). Three licences are non-commercial (bespoke-nimble-9b-v3, openjev and TimesFM 3.0): fine for research, but trading with them needs the owner's permission. Timestral's allows commercial use for companies below $20 M of monthly revenue.
 
@@ -130,4 +130,4 @@ Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed t
 
 ## Next
 
-- **Forward test:** scoring on November 2026 to April 2027, a period no model or hypothesis here can reflect, against hypotheses registered in advance, including the news effect and the Bollinger-band reversal noted in 02, plus prediction markets: see the [pre-registered plan](docs/forward_test_plan.md).
+- **Forward test:** scoring on November 2026 to April 2027, a period no model or hypothesis here can reflect, against hypotheses registered in advance, including the news effect, the Bollinger-band reversal noted in 02 and Timestral's edge found in 06, plus prediction markets: see the [pre-registered plan](docs/forward_test_plan.md).
