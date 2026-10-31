@@ -131,3 +131,7 @@ Other optional extras: `yahoo` (yfinance) and `trends` (pytrends), only needed t
 ## Next
 
 - **Forward test:** scoring on November 2026 to April 2027, a period no model or hypothesis here can reflect, against hypotheses registered in advance, including the news effect, the Bollinger-band reversal noted in 02 and Timestral's edge found in 06, plus prediction markets: see the [pre-registered plan](docs/forward_test_plan.md).
+
+## Licence
+
+The code and notebooks are released under the [Apache License 2.0](LICENSE). Models keep their own licences (see the table above), and the data snapshots remain subject to their sources' terms.
