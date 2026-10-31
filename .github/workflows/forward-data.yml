@@ -18,11 +18,11 @@ concurrency:
 
 jobs:
   collect:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # pinned, so the image cannot change under a year-long job
     timeout-minutes: 300
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check out the data branch (created on the first run)
         run: |
@@ -34,7 +34,7 @@ jobs:
             git worktree add --orphan -b forward-data store
           fi
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
