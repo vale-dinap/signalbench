@@ -49,6 +49,7 @@ jobs:
         run: python scripts/collect_forward.py store/data/forward
 
       - name: Commit
+        if: ${{ !cancelled() }}   # also when every source failed, so the manifest records it
         working-directory: store
         run: |
           git config user.name "github-actions[bot]"
@@ -61,3 +62,14 @@ jobs:
           git commit -m "data: forward-test snapshot through $(jq -r .through data/forward/manifest.json)" \
                      -m "Run $GITHUB_RUN_ID of $GITHUB_WORKFLOW at master $GITHUB_SHA."
           git push origin forward-data
+
+      # After the commit, so what did arrive is kept; a red run makes GitHub email the failure.
+      - name: Fail if any source failed
+        if: ${{ !cancelled() }}
+        run: |
+          failed=$(jq -r '.sources | to_entries[] | select(.value.status != "ok") | "\(.key): \(.value.error)"' \
+                   store/data/forward/manifest.json)
+          if [ -n "$failed" ]; then
+            while IFS= read -r line; do echo "::error::$line"; done <<< "$failed"
+            exit 1
+          fi
