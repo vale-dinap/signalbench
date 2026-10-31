@@ -1,0 +1,38 @@
+{
+  "run_at_utc": "2026-10-31 20:18:09",
+  "through": "2026-10-30",
+  "sources": {
+    "prices": {
+      "status": "ok",
+      "BTC": "60 rows to 2026-10-30",
+      "ETH": "60 rows to 2026-10-30",
+      "SPY": "43 rows to 2026-10-30",
+      "AAPL": "43 rows to 2026-10-30",
+      "GLD": "43 rows to 2026-10-30",
+      "USO": "43 rows to 2026-10-30",
+      "EURUSD": "44 rows to 2026-10-30",
+      "USDJPY": "44 rows to 2026-10-30"
+    },
+    "trends": {
+      "status": "ok",
+      "BTC": "60 rows to 2026-10-30",
+      "ETH": "60 rows to 2026-10-30",
+      "SPY": "60 rows to 2026-10-30",
+      "AAPL": "60 rows to 2026-10-30",
+      "GLD": "60 rows to 2026-10-30",
+      "USO": "60 rows to 2026-10-30",
+      "EURUSD": "60 rows to 2026-10-30",
+      "USDJPY": "60 rows to 2026-10-30"
+    },
+    "news": {
+      "status": "ok",
+      "days": 30,
+      "hours without a file": 0,
+      "articles matched": 62843
+    },
+    "polymarket": {
+      "status": "ok",
+      "events": 0
+    }
+  }
+}
