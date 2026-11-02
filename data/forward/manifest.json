@@ -1,5 +1,5 @@
 {
-  "run_at_utc": "2026-11-02 06:41:20",
+  "run_at_utc": "2026-11-02 11:42:43",
   "through": "2026-11-01",
   "sources": {
     "prices": {
@@ -31,8 +31,9 @@
       "articles matched": 65066
     },
     "polymarket": {
-      "status": "failed",
-      "error": "ReadTimeout: HTTPSConnectionPool(host='clob.polymarket.com', port=443): Read timed out. (read timeout=30)"
+      "status": "ok",
+      "events": 200,
+      "markets selected": 17
     }
   }
 }
