@@ -18,10 +18,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import traceback
+from collections.abc import Callable
 from pathlib import Path
 
 import pandas as pd
+import requests
 
 from sbench import markets, news
 from sbench.data import cached, fetch_polymarket_closed_events, load_google_trends, load_polymarket_history
@@ -64,6 +67,27 @@ def news_(out: Path, through: pd.Timestamp) -> dict:
             "articles matched": int(slots["matched"].sum())}
 
 
+def retried(fn: Callable, first: float = 5.0, budget: float = 300.0) -> Callable:
+    """fn, retried on a network error (a timeout, a refused or dropped connection, an HTTP error).
+
+    Exponential backoff: waits of first, 2 x first, 4 x first, ..., the last one shortened
+    so that the waits total `budget` seconds (5, 10, 20, 40, 80 and 145 by default);
+    the error is raised once the budget is spent.
+    """
+    def call(*args, **kwargs):
+        wait, left = first, budget
+        while True:
+            try:
+                return fn(*args, **kwargs)
+            except requests.RequestException:
+                if left <= 0:
+                    raise
+                time.sleep(min(wait, left))
+                left -= min(wait, left)
+                wait *= 2
+    return call
+
+
 def polymarket(out: Path, through: pd.Timestamp) -> dict:
     """Closed events of the period so far, and the price histories notebook 05 would fetch for them.
 
@@ -73,13 +97,13 @@ def polymarket(out: Path, through: pd.Timestamp) -> dict:
     if through < pd.Timestamp(START):
         return {"events": 0}
     out.mkdir(parents=True, exist_ok=True)
-    events = fetch_polymarket_closed_events(START, through)
+    events = retried(fetch_polymarket_closed_events)(START, through)
     (out / "events.json").write_text(json.dumps(events), encoding="utf-8")
+    load = retried(load_polymarket_history)   # hundreds of requests a run: one slow answer must not end it
     questions = markets.select_markets(
         events,
-        history=lambda tok: cached(out / "history" / f"{tok}.csv", load_polymarket_history, tok),
-        recent=lambda tok, a, b: cached(out / "recent" / f"{tok}_{a:%Y%m%d%H}.csv", load_polymarket_history, tok, 60,
-                                        start=a, end=b))
+        history=lambda tok: cached(out / "history" / f"{tok}.csv", load, tok),
+        recent=lambda tok, a, b: cached(out / "recent" / f"{tok}_{a:%Y%m%d%H}.csv", load, tok, 60, start=a, end=b))
     return {"events": len(events), "markets selected": len(questions)}
 
 
